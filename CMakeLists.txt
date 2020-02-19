@@ -9,3 +9,9 @@ add_compile_options(
 
 add_executable(vector main.cpp)
 target_link_libraries(vector -fsanitize=address)
+
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+add_executable(unit_test test.cpp)
+target_link_libraries(unit_test ${GTEST_BOTH_LIBRARIES} gtest -fsanitize=address  pthread)
