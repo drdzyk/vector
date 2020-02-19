@@ -39,7 +39,7 @@ namespace low
             return *(begin_ + idx);
         }
 
-        ~vector()
+        ~vector() noexcept
         {
             alloc_type alloc;
             alloc_traits::deallocate(alloc, begin_, capacity_ - begin_);
