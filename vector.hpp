@@ -12,6 +12,7 @@ namespace low
         using value_type = T;
         using pointer = T*;
         using reference = T&;
+        using const_reference = const T&;
 
         using alloc_type = typename Alloc::template rebind<T>::other;
         using alloc_traits = std::allocator_traits<alloc_type>;
@@ -28,8 +29,18 @@ namespace low
             end_ += 1u;
         }
 
+        reference operator[](std::size_t idx)
+        {
+            return *(begin_ + idx);
+        }
+
+        const_reference operator[](std::size_t idx) const
+        {
+            return *(begin_ + idx);
+        }
+
     private:
-        void reallocate_storage(const alloc_type &alloc)
+        void reallocate_storage(alloc_type &alloc)
         {
             std::size_t how_many_stored = end_ - begin_;
             std::size_t next_capacity = get_next_capacity(how_many_stored);
