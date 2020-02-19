@@ -39,13 +39,24 @@ namespace low
             return *(begin_ + idx);
         }
 
+        ~vector()
+        {
+            alloc_type alloc;
+            alloc_traits::deallocate(alloc, begin_, capacity_ - begin_);
+        }
+
     private:
         void reallocate_storage(alloc_type &alloc)
         {
             std::size_t how_many_stored = end_ - begin_;
             std::size_t next_capacity = get_next_capacity(how_many_stored);
+
+            // allocate new storage
             auto new_memory = alloc_traits::allocate(alloc, next_capacity);
+            // store holded data in new storage
             std::memcpy(new_memory, begin_, how_many_stored * sizeof(value_type));
+            // freed old storage
+            alloc_traits::deallocate(alloc, begin_, how_many_stored);
 
             begin_ = new_memory;
             end_ = new_memory + how_many_stored;
