@@ -48,7 +48,7 @@ namespace low
             std::memcpy(new_memory, begin_, how_many_stored * sizeof(value_type));
 
             begin_ = new_memory;
-            end_ = new_memory;
+            end_ = new_memory + how_many_stored;
             capacity_ = new_memory + next_capacity;
         }
         static std::size_t get_next_capacity(std::size_t capacity) noexcept
