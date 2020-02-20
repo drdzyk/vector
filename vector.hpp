@@ -6,8 +6,6 @@ namespace low
     template <typename T, typename Alloc = std::allocator<T>>
     class vector
     {
-        static_assert(std::is_pod_v<T>); // WIP
-
     public:
         using value_type = T;
         using pointer = T*;
@@ -67,7 +65,7 @@ namespace low
             // allocate new storage
             auto new_memory = alloc_traits::allocate(alloc, next_capacity);
             // store holded data in new storage
-            std::memcpy(new_memory, begin_, current_size * sizeof(value_type));
+            std::copy(begin_, end_, new_memory);
             // freed old storage
             alloc_traits::deallocate(alloc, begin_, current_size);
 
