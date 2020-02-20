@@ -27,6 +27,41 @@ TEST(vector, emplace_back)
     ASSERT_EQ(v[2], 9);
 }
 
+TEST(vector, iterators)
+{
+    low::vector<int> v;
+    ASSERT_EQ(v.begin(), v.end());
+
+    v.emplace_back(7);
+    ASSERT_NE(v.begin(), v.end());
+    ASSERT_EQ(std::distance(v.begin(), v.end()), 1);
+    ASSERT_EQ(*v.begin(), 7);
+
+    v.emplace_back(8);
+    ASSERT_NE(v.begin(), v.end());
+    ASSERT_EQ(std::distance(v.begin(), v.end()), 2);
+    ASSERT_EQ(*v.begin(), 7);
+    ASSERT_EQ(*std::next(v.begin()), 8);
+
+    *v.begin() = 9;
+    ASSERT_EQ(*v.begin(), 9);
+    ASSERT_EQ(*std::next(v.begin()), 8);
+}
+
+TEST(vector, range_based_for)
+{
+    low::vector<int> v;
+    v.emplace_back(7);
+    v.emplace_back(8);
+    v.emplace_back(9);
+
+    auto it = v.begin();
+    for (const auto &e : v)
+    {
+        ASSERT_EQ(e, *it++);
+    }
+}
+
 void assertContentEq(const std::vector<int> &src, const low::vector<int> &v2)
 {
     ASSERT_EQ(src.size(), v2.size());
