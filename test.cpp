@@ -27,7 +27,7 @@ TEST(vector, emplace_back)
     ASSERT_EQ(v[2], 9);
 }
 
-TEST(vector, iterators)
+TEST(vector, iterator)
 {
     low::vector<int> v;
     ASSERT_EQ(v.begin(), v.end());
@@ -46,6 +46,24 @@ TEST(vector, iterators)
     *v.begin() = 9;
     ASSERT_EQ(*v.begin(), 9);
     ASSERT_EQ(*std::next(v.begin()), 8);
+}
+
+
+TEST(vector, const_iterator)
+{
+    low::vector<int> v;
+    ASSERT_EQ(v.cbegin(), v.cend());
+
+    v.emplace_back(7);
+    ASSERT_NE(v.cbegin(), v.cend());
+    ASSERT_EQ(std::distance(v.cbegin(), v.cend()), 1);
+    ASSERT_EQ(*v.cbegin(), 7);
+
+    v.emplace_back(8);
+    ASSERT_NE(v.cbegin(), v.cend());
+    ASSERT_EQ(std::distance(v.cbegin(), v.cend()), 2);
+    ASSERT_EQ(*v.cbegin(), 7);
+    ASSERT_EQ(*std::next(v.cbegin()), 8);
 }
 
 TEST(vector, range_based_for)

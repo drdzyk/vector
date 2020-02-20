@@ -11,6 +11,7 @@ namespace low
     public:
         using value_type = T;
         using pointer = T*;
+        using const_pointer = const T*;
         using reference = T&;
         using const_reference = const T&;
 
@@ -18,6 +19,7 @@ namespace low
         using alloc_traits = std::allocator_traits<alloc_type>;
 
         using iterator = __gnu_cxx::__normal_iterator<pointer, vector>;
+        using const_iterator = __gnu_cxx::__normal_iterator<const_pointer, vector>;
 
         template <typename ...Args>
         void emplace_back(Args&& ...args)
@@ -46,6 +48,9 @@ namespace low
 
         iterator begin() noexcept { return iterator{begin_}; }
         iterator end() noexcept { return iterator{end_}; }
+
+        const_iterator cbegin() const noexcept { return const_iterator{begin_}; }
+        const_iterator cend() const noexcept { return const_iterator{end_}; }
 
         ~vector() noexcept
         {
