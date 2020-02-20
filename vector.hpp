@@ -21,7 +21,7 @@ namespace low
         void emplace_back(Args&& ...args)
         {
             alloc_type alloc;
-            if (end_ == capacity_)
+            if (size() == capacity())
             {
                 reallocate_storage(alloc);
             }
@@ -51,24 +51,21 @@ namespace low
     private:
         void reallocate_storage(alloc_type &alloc)
         {
-            std::size_t how_many_stored = end_ - begin_;
-            std::size_t next_capacity = get_next_capacity(how_many_stored);
+            std::size_t current_size = size();
+            std::size_t next_capacity = get_next_capacity(current_size);
 
             // allocate new storage
             auto new_memory = alloc_traits::allocate(alloc, next_capacity);
             // store holded data in new storage
-            std::memcpy(new_memory, begin_, how_many_stored * sizeof(value_type));
+            std::memcpy(new_memory, begin_, current_size * sizeof(value_type));
             // freed old storage
-            alloc_traits::deallocate(alloc, begin_, how_many_stored);
+            alloc_traits::deallocate(alloc, begin_, current_size);
 
             begin_ = new_memory;
-            end_ = new_memory + how_many_stored;
+            end_ = new_memory + current_size;
             capacity_ = new_memory + next_capacity;
         }
-        static std::size_t get_next_capacity(std::size_t capacity) noexcept
-        {
-            return capacity ? capacity * 2 : 1;
-        }
+        static std::size_t get_next_capacity(std::size_t size) noexcept { return size ? size * 2 : 1; }
 
         pointer begin_{nullptr};
         pointer end_{nullptr};
