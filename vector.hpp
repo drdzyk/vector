@@ -17,6 +17,8 @@ namespace low
         using alloc_type = typename Alloc::template rebind<T>::other;
         using alloc_traits = std::allocator_traits<alloc_type>;
 
+        using iterator = __gnu_cxx::__normal_iterator<pointer, vector>;
+
         template <typename ...Args>
         void emplace_back(Args&& ...args)
         {
@@ -41,6 +43,9 @@ namespace low
 
         std::size_t size() const noexcept { return end_ - begin_; }
         std::size_t capacity() const noexcept { return capacity_ - begin_; }
+
+        iterator begin() noexcept { return iterator{begin_}; }
+        iterator end() noexcept { return iterator{end_}; }
 
         ~vector() noexcept
         {
