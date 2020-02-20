@@ -2,9 +2,19 @@
 #include <vector>
 #include "vector.hpp"
 
-TEST(vector, emplace_back)
+
+using Types = testing::Types<int, std::uint32_t, float, double>;
+TYPED_TEST_CASE(VectorTest, Types);
+
+template <typename T>
+class VectorTest : public testing::Test
 {
-    low::vector<int> v;
+protected:
+};
+
+TYPED_TEST(VectorTest, emplace_back)
+{
+    low::vector<TypeParam> v;
     ASSERT_EQ(v.size(), 0);
     ASSERT_EQ(v.capacity(), 0);
 
@@ -27,7 +37,7 @@ TEST(vector, emplace_back)
     ASSERT_EQ(v[2], 9);
 }
 
-TEST(vector, iterator)
+TYPED_TEST(VectorTest, iterator)
 {
     low::vector<int> v;
     ASSERT_EQ(v.begin(), v.end());
@@ -49,7 +59,7 @@ TEST(vector, iterator)
 }
 
 
-TEST(vector, const_iterator)
+TYPED_TEST(VectorTest, const_iterator)
 {
     low::vector<int> v;
     ASSERT_EQ(v.cbegin(), v.cend());
@@ -66,7 +76,7 @@ TEST(vector, const_iterator)
     ASSERT_EQ(*std::next(v.cbegin()), 8);
 }
 
-TEST(vector, range_based_for)
+TYPED_TEST(VectorTest, range_based_for)
 {
     low::vector<int> v;
     v.emplace_back(7);
@@ -90,7 +100,7 @@ void assertContentEq(const std::vector<int> &src, const low::vector<int> &v2)
     }
 }
 
-TEST(vector, emplace_back_regress)
+TYPED_TEST(VectorTest, emplace_back_regress)
 {
     std::vector<int> v1;
     low::vector<int> v2;
