@@ -39,6 +39,9 @@ namespace low
             return *(begin_ + idx);
         }
 
+        std::size_t size() const noexcept { return end_ - begin_; }
+        std::size_t capacity() const noexcept { return capacity_ - begin_; }
+
         ~vector() noexcept
         {
             alloc_type alloc;
