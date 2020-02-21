@@ -53,10 +53,19 @@ namespace low
         ~vector() noexcept
         {
             alloc_type alloc;
-            alloc_traits::deallocate(alloc, begin_, capacity_ - begin_);
+            release_storage(alloc);
         }
 
     private:
+        void release_storage(alloc_type &alloc) noexcept
+        {
+            for (auto it = begin(); it != end(); ++it)
+            {
+                alloc_traits::destroy(alloc, it.base());
+            }
+            alloc_traits::deallocate(alloc, begin_, capacity());
+        }
+
         void reallocate_storage(alloc_type &alloc)
         {
             std::size_t current_size = size();
@@ -64,10 +73,10 @@ namespace low
 
             // allocate new storage
             auto new_memory = alloc_traits::allocate(alloc, next_capacity);
-            // store holded data in new storage
-            std::copy(begin_, end_, new_memory);
+            // move old data in new storage
+            std::uninitialized_move(begin_, end_, new_memory);
             // freed old storage
-            alloc_traits::deallocate(alloc, begin_, current_size);
+            release_storage(alloc);
 
             begin_ = new_memory;
             end_ = new_memory + current_size;

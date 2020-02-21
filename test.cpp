@@ -48,7 +48,8 @@ private:
 
 
 
-using Types = testing::Types<int, std::uint32_t, float, double, A>;
+using Types = testing::Types<std::string>;
+//using Types = testing::Types<int, std::uint32_t, float, double, A>;
 TYPED_TEST_CASE(VectorTest, Types);
 
 template <typename T>
@@ -63,23 +64,23 @@ TYPED_TEST(VectorTest, emplace_back)
     ASSERT_EQ(v.size(), 0);
     ASSERT_EQ(v.capacity(), 0);
 
-    v.emplace_back(7);
+    v.emplace_back("skghdsfghsdfgjdfhjdkfbvgdhfjbvgjdfvgdfjbvdfjbv");
     ASSERT_EQ(v.size(), 1);
     ASSERT_EQ(v.capacity(), 1);
-    ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[0], "skghdsfghsdfgjdfhjdkfbvgdhfjbvgjdfvgdfjbvdfjbv");
 
-    v.emplace_back(8);
+    v.emplace_back("fgmdfkjghdfghudfhgoudhfgodfhg");
     ASSERT_EQ(v.size(), 2);
     ASSERT_EQ(v.capacity(), 2);
-    ASSERT_EQ(v[0], 7);
-    ASSERT_EQ(v[1], 8);
-
-    v.emplace_back(9);
+    ASSERT_EQ(v[0], "skghdsfghsdfgjdfhjdkfbvgdhfjbvgjdfvgdfjbvdfjbv");
+    ASSERT_EQ(v[1], "fgmdfkjghdfghudfhgoudhfgodfhg");
+//
+    v.emplace_back("efg");
     ASSERT_EQ(v.size(), 3);
     ASSERT_EQ(v.capacity(), 4);
-    ASSERT_EQ(v[0], 7);
-    ASSERT_EQ(v[1], 8);
-    ASSERT_EQ(v[2], 9);
+    ASSERT_EQ(v[0], "skghdsfghsdfgjdfhjdkfbvgdhfjbvgjdfvgdfjbvdfjbv");
+    ASSERT_EQ(v[1], "fgmdfkjghdfghudfhgoudhfgodfhg");
+    ASSERT_EQ(v[2], "efg");
 }
 
 //TYPED_TEST(VectorTest, iterator)
