@@ -84,7 +84,7 @@ TYPED_TEST(VectorTest, emplace_back)
 
 TYPED_TEST(VectorTest, iterator)
 {
-    low::vector<int> v;
+    low::vector<TypeParam> v;
     ASSERT_EQ(v.begin(), v.end());
 
     v.emplace_back(7);
@@ -106,7 +106,7 @@ TYPED_TEST(VectorTest, iterator)
 
 TYPED_TEST(VectorTest, const_iterator)
 {
-    low::vector<int> v;
+    low::vector<TypeParam> v;
     ASSERT_EQ(v.cbegin(), v.cend());
 
     v.emplace_back(7);
@@ -123,7 +123,7 @@ TYPED_TEST(VectorTest, const_iterator)
 
 TYPED_TEST(VectorTest, range_based_for)
 {
-    low::vector<int> v;
+    low::vector<TypeParam> v;
     v.emplace_back(7);
     v.emplace_back(8);
     v.emplace_back(9);
@@ -137,7 +137,7 @@ TYPED_TEST(VectorTest, range_based_for)
 
 TYPED_TEST(VectorTest, reserve)
 {
-    low::vector<int> v;
+    low::vector<TypeParam> v;
     ASSERT_EQ(v.size(), 0);
     ASSERT_EQ(v.capacity(), 0);
 
@@ -169,7 +169,8 @@ TYPED_TEST(VectorTest, reserve)
     }
 }
 
-void assertContentEq(const std::vector<int> &src, const low::vector<int> &v2)
+template <typename T>
+void assertContentEq(const std::vector<T> &src, const low::vector<T> &v2)
 {
     ASSERT_EQ(src.size(), v2.size());
     ASSERT_EQ(src.capacity(), v2.capacity());
@@ -181,8 +182,8 @@ void assertContentEq(const std::vector<int> &src, const low::vector<int> &v2)
 
 TYPED_TEST(VectorTest, emplace_back_regress)
 {
-    std::vector<int> v1;
-    low::vector<int> v2;
+    std::vector<TypeParam> v1;
+    low::vector<TypeParam> v2;
 
     for (std::size_t idx{0}; idx < 100; ++idx)
     {

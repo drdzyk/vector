@@ -38,6 +38,15 @@ namespace low
             reallocate_storage(alloc, new_capacity, 0);
         }
 
+        void resize(std::size_t new_size)
+        {
+            if (new_size < size())
+            {
+                end_ = begin_ + new_size;
+                return;
+            }
+        }
+
         reference operator[](std::size_t idx)
         {
             return *(begin_ + idx);
