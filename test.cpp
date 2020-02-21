@@ -135,6 +135,21 @@ TYPED_TEST(VectorTest, range_based_for)
     }
 }
 
+TYPED_TEST(VectorTest, reserve)
+{
+    low::vector<int> v;
+    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.capacity(), 0);
+
+    v.reserve(1);
+    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.capacity(), 1);
+
+    v.reserve(11);
+    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.capacity(), 11);
+}
+
 void assertContentEq(const std::vector<int> &src, const low::vector<int> &v2)
 {
     ASSERT_EQ(src.size(), v2.size());

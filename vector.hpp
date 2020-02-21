@@ -31,6 +31,20 @@ namespace low
             end_ += 1u;
         }
 
+        void reserve(std::size_t count)
+        {
+            if (count <= capacity())
+            {
+                return;
+            }
+            alloc_type alloc;
+            auto new_memory = alloc_traits::allocate(alloc, count);
+            release_storage(alloc);
+            begin_ = new_memory;
+            end_ = new_memory;
+            capacity_ = begin_ + count;
+        }
+
         reference operator[](std::size_t idx)
         {
             return *(begin_ + idx);
