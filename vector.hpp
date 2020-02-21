@@ -28,14 +28,14 @@ namespace low
             end_ += 1u;
         }
 
-        void reserve(std::size_t capacity_v)
+        void reserve(std::size_t new_capacity)
         {
-            if (capacity_v <= capacity())
+            if (new_capacity <= capacity())
             {
                 return;
             }
             alloc_type alloc;
-            reallocate_storage(alloc, capacity_v, 0);
+            reallocate_storage(alloc, new_capacity, 0);
         }
 
         reference operator[](std::size_t idx)
@@ -73,26 +73,26 @@ namespace low
             alloc_traits::deallocate(alloc, begin_, capacity());
         }
 
-        void reallocate_storage(alloc_type &alloc, std::size_t capacity_v, std::size_t size_v)
+        void reallocate_storage(alloc_type &alloc, std::size_t new_capacity, std::size_t new_size)
         {
             // allocate new storage
-            auto new_memory = alloc_traits::allocate(alloc, capacity_v);
+            auto new_memory = alloc_traits::allocate(alloc, new_capacity);
             // move old data in new storage
-            std::uninitialized_move(begin_, begin_ + size_v, new_memory);
+            std::uninitialized_move(begin_, begin_ + new_size, new_memory);
             // freed old storage
             release_storage(alloc);
 
             begin_ = new_memory;
-            end_ = new_memory + size_v;
-            capacity_ = new_memory + capacity_v;
+            end_ = new_memory + new_size;
+            capacity_ = new_memory + new_capacity;
         }
 
         void reallocate_storage_if_needed(alloc_type &alloc)
         {
             if (auto current_size = size(); current_size == capacity())
             {
-                std::size_t next_capacity = current_size ? current_size * 2 : 1;;
-                reallocate_storage(alloc, next_capacity, current_size);
+                std::size_t new_capacity{current_size ? current_size * 2 : 1};
+                reallocate_storage(alloc, new_capacity, current_size);
             }
         }
 
