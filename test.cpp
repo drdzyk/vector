@@ -6,6 +6,7 @@
 class A
 {
 public:
+    A() = default;
     A(int i) : i_(new int(i)) {}
     A(const A &other): i_(new int(*other.i_))
     {
@@ -167,6 +168,30 @@ TYPED_TEST(VectorTest, reserve)
         ASSERT_EQ(v.size(), idx + 1);
         ASSERT_EQ(v.capacity(), 11);
     }
+}
+
+TYPED_TEST(VectorTest, resize)
+{
+    low::vector<TypeParam> v;
+    v.emplace_back(7);
+    v.emplace_back(8);
+    v.emplace_back(9);
+
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[1], 8);
+    ASSERT_EQ(v[2], 9);
+
+    v.resize(1);
+    ASSERT_EQ(v.size(), 1);
+    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v[0], 7);
+
+    v.resize(3);
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.capacity(), 3); // wrong! should be 4
+    ASSERT_EQ(v[0], 7);
 }
 
 template <typename T>

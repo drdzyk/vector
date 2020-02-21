@@ -40,10 +40,24 @@ namespace low
 
         void resize(std::size_t new_size)
         {
-            if (new_size < size())
+            alloc_type alloc;
+            const auto diff = static_cast<std::ptrdiff_t>(new_size - size());
+            if (diff < 0)
             {
-                end_ = begin_ + new_size;
-                return;
+                for (std::ptrdiff_t count{diff}; count < 0; ++count)
+                {
+                    end_ -= 1u;
+                    alloc_traits::destroy(alloc, end_);
+                }
+            }
+            else if (diff > 0)
+            {
+                reallocate_storage(alloc, new_size, size());
+                for (std::ptrdiff_t count{0}; count < diff; ++count)
+                {
+                    alloc_traits::construct(alloc, end_);
+                    end_ += 1u;
+                }
             }
         }
 
