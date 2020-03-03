@@ -148,24 +148,28 @@ TYPED_TEST(VectorTest, reserve)
 
     v.emplace_back(77);
     ASSERT_EQ(v.size(), 1);
+    ASSERT_EQ(v[0], 77);
     ASSERT_EQ(v.capacity(), 1);
 
     v.reserve(11);
-    ASSERT_EQ(v.size(), 0); // discard stored element
+    ASSERT_EQ(v.size(), 1);
+    ASSERT_EQ(v[0], 77);
     ASSERT_EQ(v.capacity(), 11);
 
     v.reserve(11);
-    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.size(), 1);
+    ASSERT_EQ(v[0], 77);
     ASSERT_EQ(v.capacity(), 11);
 
     v.reserve(7);
-    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.size(), 1);
+    ASSERT_EQ(v[0], 77);
     ASSERT_EQ(v.capacity(), 11);
 
-    for (std::size_t idx{0}; idx < 11; ++idx)
+    for (std::size_t idx{0}; idx < 10; ++idx)
     {
         v.emplace_back(idx);
-        ASSERT_EQ(v.size(), idx + 1);
+        ASSERT_EQ(v.size(), idx + 2);
         ASSERT_EQ(v.capacity(), 11);
     }
 }

@@ -30,12 +30,11 @@ namespace low
 
         void reserve(std::size_t new_capacity)
         {
-            if (new_capacity <= capacity())
+            if (new_capacity > capacity())
             {
-                return;
+                alloc_type alloc;
+                reallocate_storage(alloc, new_capacity, size());
             }
-            alloc_type alloc;
-            reallocate_storage(alloc, new_capacity, 0);
         }
 
         void resize(std::size_t new_size)
