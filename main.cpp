@@ -2,6 +2,12 @@
 #include "vector.hpp"
 #include <vector>
 
+
+// TODO:
+// 1)ctor - dtor sequence?
+// 2) exception safety
+// 3) call move ctor only when noexcept
+
 int main() {
     low::vector<int> v;
     v.resize(12);
