@@ -194,8 +194,29 @@ TYPED_TEST(VectorTest, resize)
 
     v.resize(3);
     ASSERT_EQ(v.size(), 3);
-    ASSERT_EQ(v.capacity(), 3); // wrong! should be 4
+    ASSERT_EQ(v.capacity(), 4);
     ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[1], TypeParam{});
+    ASSERT_EQ(v[2], TypeParam{});
+
+    v.resize(4);
+    ASSERT_EQ(v.size(), 4);
+    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[1], TypeParam{});
+    ASSERT_EQ(v[2], TypeParam{});
+    ASSERT_EQ(v[3], TypeParam{});
+
+    v.resize(7);
+    ASSERT_EQ(v.size(), 7);
+    ASSERT_EQ(v.capacity(), 7);
+    ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[1], TypeParam{});
+    ASSERT_EQ(v[2], TypeParam{});
+    ASSERT_EQ(v[3], TypeParam{});
+    ASSERT_EQ(v[4], TypeParam{});
+    ASSERT_EQ(v[5], TypeParam{});
+    ASSERT_EQ(v[6], TypeParam{});
 }
 
 template <typename T>

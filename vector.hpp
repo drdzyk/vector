@@ -40,7 +40,7 @@ namespace low
         void resize(std::size_t new_size)
         {
             alloc_type alloc;
-            const auto diff = static_cast<std::ptrdiff_t>(new_size - size());
+            const auto diff = static_cast<std::ptrdiff_t>(new_size) - static_cast<std::ptrdiff_t>(size());
             if (diff < 0)
             {
                 for (std::ptrdiff_t count{diff}; count < 0; ++count)
@@ -51,7 +51,10 @@ namespace low
             }
             else if (diff > 0)
             {
-                reallocate_storage(alloc, new_size, size());
+                if (capacity() < new_size)
+                {
+                    reallocate_storage(alloc, new_size, size());
+                }
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {
                     alloc_traits::construct(alloc, end_);
