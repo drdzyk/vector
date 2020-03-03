@@ -3,25 +3,25 @@
 #include "vector.hpp"
 
 
-class A
+class DynamicInt
 {
 public:
-    A() = default;
-    A(int i) : i_(new int(i)) {}
-    A(const A &other) : i_(other.i_ ? new int(*other.i_) : nullptr)
+    DynamicInt() = default;
+    DynamicInt(int i) : i_(new int(i)) {}
+    DynamicInt(const DynamicInt &other) : i_(other.i_ ? new int(*other.i_) : nullptr)
     {
     }
-    A(A &&other): i_(other.i_)
+    DynamicInt(DynamicInt &&other): i_(other.i_)
     {
         other.i_ = nullptr;
     }
-    A& operator=(const A &other)
+    DynamicInt& operator=(const DynamicInt &other)
     {
         delete i_;
         i_ = new int(*other.i_);
         return *this;
     }
-    A& operator=(A &&other)
+    DynamicInt& operator=(DynamicInt &&other)
     {
         delete i_;
         i_ = other.i_;
@@ -29,9 +29,9 @@ public:
         return *this;
     }
 
-    ~A() { delete i_; }
+    ~DynamicInt() { delete i_; }
 
-    friend bool operator==(const A &lhs, const A&rhs) noexcept
+    friend bool operator==(const DynamicInt &lhs, const DynamicInt &rhs) noexcept
     {
         if (rhs.i_ == nullptr && lhs.i_ == nullptr)
         {
@@ -47,9 +47,7 @@ private:
     int *i_{nullptr};
 };
 
-
-
-using Types = testing::Types<int, std::uint32_t, float, double, A>;
+using Types = testing::Types<int, std::uint32_t, float, double, DynamicInt>;
 TYPED_TEST_CASE(VectorTest, Types);
 
 template <typename T>
