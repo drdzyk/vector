@@ -280,7 +280,7 @@ TYPED_TEST(VectorTest, resize_scale_std_vector)
 }
 
 template <typename T>
-void assertContentEq(const std::vector<T> &src, const low::vector<T> &v2)
+void assert_content_eq(const std::vector<T> &src, const low::vector<T> &v2)
 {
     ASSERT_EQ(src.size(), v2.size());
     ASSERT_EQ(src.capacity(), v2.capacity());
@@ -299,6 +299,6 @@ TYPED_TEST(VectorTest, emplace_back_regress)
     {
         v1.emplace_back(idx);
         v2.emplace_back(idx);
-        assertContentEq(v1, v2);
+        assert_content_eq(v1, v2);
     }
 }
