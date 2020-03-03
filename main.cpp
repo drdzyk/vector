@@ -4,7 +4,8 @@
 
 
 // TODO:
-// 1)ctor - dtor sequence?
+// 0) combine logic of reallocate storage
+// 1) ctor - dtor sequence?
 // 2) exception safety
 // 3) call move ctor only when noexcept
 
