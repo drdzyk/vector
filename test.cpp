@@ -239,6 +239,10 @@ TYPED_TEST(VectorTest, resize)
     test_resize<low::vector<TypeParam>>();
 }
 
+TYPED_TEST(VectorTest, resize_std_vector)
+{
+    test_resize<std::vector<TypeParam>>();
+}
 
 template <typename Vector>
 void test_resize_scale()
@@ -270,6 +274,11 @@ void test_resize_scale()
 TYPED_TEST(VectorTest, resize_scale)
 {
     test_resize_scale<low::vector<TypeParam>>();
+}
+
+TYPED_TEST(VectorTest, resize_scale_std_vector)
+{
+    test_resize_scale<std::vector<TypeParam>>();
 }
 
 template <typename T>
