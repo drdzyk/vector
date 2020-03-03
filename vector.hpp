@@ -53,7 +53,11 @@ namespace low
             {
                 if (capacity() < new_size)
                 {
-                    reallocate_storage(alloc, new_size, size());
+                    std::size_t current_size{size()};
+                    std::size_t new_capacity{current_size ? current_size * 2 : 1};
+                    reallocate_storage(alloc,
+                       new_size > new_capacity ? new_size : new_capacity,
+                        current_size);
                 }
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {

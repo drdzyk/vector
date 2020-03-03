@@ -224,7 +224,7 @@ void test_resize()
 
     v.resize(7);
     ASSERT_EQ(v.size(), 7);
-    ASSERT_EQ(v.capacity(), 7);
+    ASSERT_EQ(v.capacity(), 8);
     ASSERT_EQ(v[0], 7);
     ASSERT_EQ(v[1], value_type{});
     ASSERT_EQ(v[2], value_type{});
