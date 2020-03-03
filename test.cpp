@@ -239,6 +239,39 @@ TYPED_TEST(VectorTest, resize)
     test_resize<low::vector<TypeParam>>();
 }
 
+
+template <typename Vector>
+void test_resize_scale()
+{
+    using value_type =  typename Vector::value_type;
+    Vector v;
+
+    v.resize(8);
+    ASSERT_EQ(v.size(), 8);
+    ASSERT_EQ(v.capacity(), 8);
+
+    v.resize(0);
+    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.capacity(), 8);
+
+    v.resize(7);
+    ASSERT_EQ(v.size(), 7);
+    ASSERT_EQ(v.capacity(), 8);
+
+    v.resize(11);
+    ASSERT_EQ(v.size(), 11);
+    ASSERT_EQ(v.capacity(), 14);
+
+    v.resize(23);
+    ASSERT_EQ(v.size(), 23);
+    ASSERT_EQ(v.capacity(), 23);
+}
+
+TYPED_TEST(VectorTest, resize_scale)
+{
+    test_resize_scale<low::vector<TypeParam>>();
+}
+
 template <typename T>
 void assertContentEq(const std::vector<T> &src, const low::vector<T> &v2)
 {
