@@ -8,7 +8,7 @@ class A
 public:
     A() = default;
     A(int i) : i_(new int(i)) {}
-    A(const A &other): i_(new int(*other.i_))
+    A(const A &other) : i_(other.i_ ? new int(*other.i_) : nullptr)
     {
     }
     A(A &&other): i_(other.i_)
