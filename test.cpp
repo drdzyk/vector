@@ -136,9 +136,10 @@ TYPED_TEST(VectorTest, range_based_for)
     }
 }
 
-TYPED_TEST(VectorTest, reserve)
+template <typename Vector>
+void test_reserve()
 {
-    low::vector<TypeParam> v;
+    Vector v;
     ASSERT_EQ(v.size(), 0);
     ASSERT_EQ(v.capacity(), 0);
 
@@ -172,6 +173,16 @@ TYPED_TEST(VectorTest, reserve)
         ASSERT_EQ(v.size(), idx + 2);
         ASSERT_EQ(v.capacity(), 11);
     }
+}
+
+TYPED_TEST(VectorTest, reserve)
+{
+    test_reserve<low::vector<TypeParam>>();
+}
+
+TYPED_TEST(VectorTest, reserve_std_vector)
+{
+    test_reserve<std::vector<TypeParam>>();
 }
 
 TYPED_TEST(VectorTest, resize)
