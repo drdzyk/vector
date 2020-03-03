@@ -185,9 +185,13 @@ TYPED_TEST(VectorTest, reserve_std_vector)
     test_reserve<std::vector<TypeParam>>();
 }
 
-TYPED_TEST(VectorTest, resize)
+
+template <typename Vector>
+void test_resize()
 {
-    low::vector<TypeParam> v;
+    using value_type =  typename Vector::value_type;
+
+    Vector v;
     v.emplace_back(7);
     v.emplace_back(8);
     v.emplace_back(9);
@@ -207,27 +211,32 @@ TYPED_TEST(VectorTest, resize)
     ASSERT_EQ(v.size(), 3);
     ASSERT_EQ(v.capacity(), 4);
     ASSERT_EQ(v[0], 7);
-    ASSERT_EQ(v[1], TypeParam{});
-    ASSERT_EQ(v[2], TypeParam{});
+    ASSERT_EQ(v[1], value_type{});
+    ASSERT_EQ(v[2], value_type{});
 
     v.resize(4);
     ASSERT_EQ(v.size(), 4);
     ASSERT_EQ(v.capacity(), 4);
     ASSERT_EQ(v[0], 7);
-    ASSERT_EQ(v[1], TypeParam{});
-    ASSERT_EQ(v[2], TypeParam{});
-    ASSERT_EQ(v[3], TypeParam{});
+    ASSERT_EQ(v[1], value_type{});
+    ASSERT_EQ(v[2], value_type{});
+    ASSERT_EQ(v[3], value_type{});
 
     v.resize(7);
     ASSERT_EQ(v.size(), 7);
     ASSERT_EQ(v.capacity(), 7);
     ASSERT_EQ(v[0], 7);
-    ASSERT_EQ(v[1], TypeParam{});
-    ASSERT_EQ(v[2], TypeParam{});
-    ASSERT_EQ(v[3], TypeParam{});
-    ASSERT_EQ(v[4], TypeParam{});
-    ASSERT_EQ(v[5], TypeParam{});
-    ASSERT_EQ(v[6], TypeParam{});
+    ASSERT_EQ(v[1], value_type{});
+    ASSERT_EQ(v[2], value_type{});
+    ASSERT_EQ(v[3], value_type{});
+    ASSERT_EQ(v[4], value_type{});
+    ASSERT_EQ(v[5], value_type{});
+    ASSERT_EQ(v[6], value_type{});
+}
+
+TYPED_TEST(VectorTest, resize)
+{
+    test_resize<low::vector<TypeParam>>();
 }
 
 template <typename T>
