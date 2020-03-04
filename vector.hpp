@@ -106,8 +106,13 @@ namespace low
         {
             // allocate new storage
             auto new_memory = alloc_traits::allocate(alloc, new_capacity);
+
             // move old data in new storage
-            std::uninitialized_move(begin_, begin_ + new_size, new_memory);
+            if constexpr (std::is_nothrow_move_constructible_v<value_type>)
+                std::uninitialized_move(begin_, begin_ + new_size, new_memory);
+            else
+                std::uninitialized_copy(begin_, begin_ + new_size, new_memory);
+
             // freed old storage
             release_storage(alloc);
 
