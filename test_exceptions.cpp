@@ -22,7 +22,6 @@ struct NoexceptCopyCtorTag{};
 struct NoexceptMoveCtorTag{};
 struct NoexceptCopyAssignTag{};
 struct NoexceptMoveAssignTag{};
-struct NoexceptDtorTag{};
 
 template <typename ...Tags>
 class A
@@ -53,7 +52,9 @@ public:
         ++tracker_->move_assign;
         return *this;
     }
-    ~A() noexcept((std::is_same_v<NoexceptDtorTag, Tags> || ...))
+    // should be always noexcept, otherwise std::is_nothrow_move_constructible_v will return false,
+    // whatever move ctor noexcept specifier
+    ~A() noexcept
     {
         ++tracker_->dtor;
     }
@@ -77,7 +78,7 @@ TEST(VectorExceptionsTest, throwing_move_ctor)
 TEST(VectorExceptionsTest, noexcept_move_ctor)
 {
     const auto tracker = std::make_shared<Tracker>();
-    low::vector<A<NoexceptDtorTag, NoexceptMoveCtorTag>> v;
+    low::vector<A<NoexceptMoveCtorTag>> v;
 
     v.emplace_back(tracker);
     ASSERT_EQ(*tracker, (Tracker{.ctor = 1}));
