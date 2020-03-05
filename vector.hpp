@@ -37,35 +37,8 @@ namespace low
             }
         }
 
-        void resize(std::size_t new_size)
-        {
-            alloc_type alloc;
-            const auto diff = static_cast<std::ptrdiff_t>(new_size) - static_cast<std::ptrdiff_t>(size());
-            if (diff < 0)
-            {
-                for (std::ptrdiff_t count{diff}; count < 0; ++count)
-                {
-                    end_ -= 1u;
-                    alloc_traits::destroy(alloc, end_);
-                }
-            }
-            else if (diff > 0)
-            {
-                if (capacity() < new_size)
-                {
-                    std::size_t current_size{size()};
-                    std::size_t new_capacity{current_size ? current_size * 2 : 1};
-                    reallocate_storage(alloc,
-                       new_size > new_capacity ? new_size : new_capacity,
-                        current_size);
-                }
-                for (std::ptrdiff_t count{0}; count < diff; ++count)
-                {
-                    alloc_traits::construct(alloc, end_);
-                    end_ += 1u;
-                }
-            }
-        }
+        void resize(std::size_t new_size) { resize_impl(new_size); }
+        void resize(std::size_t new_size, const_reference value) { resize_impl(new_size, value); }
 
         reference operator[](std::size_t idx)
         {
@@ -93,6 +66,41 @@ namespace low
         }
 
     private:
+        template <typename ...U>
+        void resize_impl(std::size_t new_size, const U& ...value)
+        {
+            static_assert(sizeof...(U) <= 1);
+            static_assert((std::is_same_v<U, value_type> && ...),
+                    "if 'value' present, then it should be of 'value_type' type");
+
+            alloc_type alloc;
+            const auto diff = static_cast<std::ptrdiff_t>(new_size) - static_cast<std::ptrdiff_t>(size());
+            if (diff < 0)
+            {
+                for (std::ptrdiff_t count{diff}; count < 0; ++count)
+                {
+                    end_ -= 1u;
+                    alloc_traits::destroy(alloc, end_);
+                }
+            }
+            else if (diff > 0)
+            {
+                if (capacity() < new_size)
+                {
+                    std::size_t current_size{size()};
+                    std::size_t new_capacity{current_size ? current_size * 2 : 1};
+                    reallocate_storage(alloc,
+                       new_size > new_capacity ? new_size : new_capacity,
+                        current_size);
+                }
+                for (std::ptrdiff_t count{0}; count < diff; ++count)
+                {
+                    alloc_traits::construct(alloc, end_, value...);
+                    end_ += 1u;
+                }
+            }
+        }
+
         void release_storage(alloc_type &alloc) noexcept
         {
             for (auto it = begin(); it != end(); ++it)
