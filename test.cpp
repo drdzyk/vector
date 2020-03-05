@@ -135,7 +135,7 @@ TYPED_TEST(VectorTest, range_based_for)
 }
 
 template <typename Vector>
-void test_reserve()
+static void test_reserve()
 {
     Vector v;
     ASSERT_EQ(v.size(), 0);
@@ -183,9 +183,8 @@ TYPED_TEST(VectorTest, reserve_std_vector)
     test_reserve<std::vector<TypeParam>>();
 }
 
-
 template <typename Vector>
-void test_resize()
+static void test_resize()
 {
     using value_type =  typename Vector::value_type;
 
@@ -232,14 +231,64 @@ void test_resize()
     ASSERT_EQ(v[6], value_type{});
 }
 
+template <typename Vector>
+static void test_valued_resize()
+{
+    using value_type =  typename Vector::value_type;
+
+    Vector v;
+    v.emplace_back(7);
+    v.emplace_back(8);
+    v.emplace_back(9);
+
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[1], 8);
+    ASSERT_EQ(v[2], 9);
+
+    v.resize(1, value_type{777});
+    ASSERT_EQ(v.size(), 1);
+    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v[0], 7);
+
+    v.resize(3, value_type{666});
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[1], value_type{666});
+    ASSERT_EQ(v[2], value_type{666});
+
+    v.resize(4);
+    ASSERT_EQ(v.size(), 4);
+    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[1], value_type{666});
+    ASSERT_EQ(v[2], value_type{666});
+    ASSERT_EQ(v[3], value_type{});
+
+    v.resize(7, value_type{999});
+    ASSERT_EQ(v.size(), 7);
+    ASSERT_EQ(v.capacity(), 8);
+    ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[1], value_type{666});
+    ASSERT_EQ(v[2], value_type{666});
+    ASSERT_EQ(v[3], value_type{});
+    ASSERT_EQ(v[4], value_type{999});
+    ASSERT_EQ(v[5], value_type{999});
+    ASSERT_EQ(v[6], value_type{999});
+}
+
 TYPED_TEST(VectorTest, resize)
 {
     test_resize<low::vector<TypeParam>>();
+    test_valued_resize<low::vector<TypeParam>>();
 }
 
 TYPED_TEST(VectorTest, resize_std_vector)
 {
     test_resize<std::vector<TypeParam>>();
+    test_valued_resize<std::vector<TypeParam>>();
 }
 
 template <typename Vector>
