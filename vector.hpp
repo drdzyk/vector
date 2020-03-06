@@ -19,6 +19,18 @@ namespace low
         using iterator = __gnu_cxx::__normal_iterator<pointer, vector>;
         using const_iterator = __gnu_cxx::__normal_iterator<const_pointer, vector>;
 
+        vector() = default;
+
+        vector(vector &&r) noexcept :
+            begin_(r.begin_),
+            end_(r.end_),
+            capacity_(r.capacity_)
+        {
+            r.begin_ = nullptr;
+            r.end_ = nullptr;
+            r.capacity_ = nullptr;
+        }
+
         template <typename ...Args>
         void emplace_back(Args&& ...args)
         {
