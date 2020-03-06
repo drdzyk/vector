@@ -364,3 +364,21 @@ TYPED_TEST(VectorTest, vector_move_constructor)
     ASSERT_EQ(copy[0], 7);
     ASSERT_EQ(copy[1], 8);
 }
+
+TYPED_TEST(VectorTest, vector_move_assignment_operator)
+{
+    low::vector<TypeParam> source;
+    source.emplace_back(7);
+    source.emplace_back(8);
+    ASSERT_EQ(source[0], 7);
+    ASSERT_EQ(source[1], 8);
+
+    low::vector<TypeParam> copy;
+    copy = std::move(source);
+    ASSERT_EQ(copy[0], 7);
+    ASSERT_EQ(copy[1], 8);
+
+    copy = std::move(copy); // check self assignment
+    ASSERT_EQ(copy[0], 7);
+    ASSERT_EQ(copy[1], 8);
+}

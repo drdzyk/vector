@@ -31,6 +31,21 @@ namespace low
             r.capacity_ = nullptr;
         }
 
+        vector &operator=(vector &&r) noexcept
+        {
+            if (this != &r) // be on a safe side
+            {
+                begin_ = r.begin_;
+                end_ = r.end_;
+                capacity_ = r.capacity_;
+                r.begin_ = nullptr;
+                r.end_ = nullptr;
+                r.capacity_ = nullptr;
+            }
+
+            return *this;
+        }
+
         template <typename ...Args>
         void emplace_back(Args&& ...args)
         {
