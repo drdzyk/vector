@@ -351,3 +351,16 @@ TYPED_TEST(VectorTest, emplace_back_regress)
         assert_content_eq(v1, v2);
     }
 }
+
+TYPED_TEST(VectorTest, vector_move_constructor)
+{
+    low::vector<TypeParam> source;
+    source.emplace_back(7);
+    source.emplace_back(8);
+    ASSERT_EQ(source[0], 7);
+    ASSERT_EQ(source[1], 8);
+
+    auto copy = std::move(source);
+    ASSERT_EQ(copy[0], 7);
+    ASSERT_EQ(copy[1], 8);
+}
