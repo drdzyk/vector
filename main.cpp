@@ -1,6 +1,9 @@
 #include <iostream>
 #include "vector.hpp"
+#include <bits/ptr_traits.h>
 #include <vector>
+#include <list>
+#include <unordered_map>
 
 
 // TODO:
@@ -9,9 +12,47 @@
 // 2) exception safety
 // 3) call move ctor only when noexcept
 // 4) test_exceptions.cpp: add std::vector
+// 5) check AllocatorAwareContainer, Container, etc
+// 6) check pocma, pocca
 
+template <typename T>
+struct A {};
+
+template <typename T>
+struct Alloc
+{
+    using value_type = T;
+
+//    template <typename U>
+//    struct rebind
+//    {
+//        using other = Alloc<U>;
+////        using other = int;
+//    };
+
+    auto allocate(size_t __n, const void* = static_cast<const void*>(0))
+    {
+        return std::allocator<T>{}.allocate(__n);
+    }
+    void deallocate(value_type* __p, size_t)
+    {
+        std::allocator<T>{}.deallocate(__p, 0);
+    }
+};
+
+template <typename T> class X;
 int main() {
-    low::vector<int> v;
+//    using T = std::__replace_first_arg_t<A<int>, double>;
+//    X<T> x;
+//    using AllocDouble = Alloc<double>;
+//    using Rebind = std::allocator_traits<AllocDouble>::rebind_alloc<int>;
+//
+//    X<Rebind> x;
+
+    std::unordered_map<int, int> d;
+    std::list<int, std::allocator<int>> l;
+
+    std::vector<int, Alloc<int>> v;
     v.resize(12);
 
 //    for (const auto &e : v)
