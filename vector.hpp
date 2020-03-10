@@ -6,6 +6,10 @@ namespace low
     template <typename T, typename Alloc = std::allocator<T>>
     class vector
     {
+        // meet AllocatorAwareContainer requirements;
+        // see https://en.cppreference.com/w/cpp/named_req/AllocatorAwareContainer#Requirements
+        static_assert(std::is_same_v<T, typename Alloc::value_type>, "vector element's type should be same as for allocator");
+
     public:
         using value_type = T;
         using pointer = T*;
@@ -13,8 +17,10 @@ namespace low
         using reference = T&;
         using const_reference = const T&;
 
-        using alloc_type = typename Alloc::template rebind<T>::other;
-        using alloc_traits = std::allocator_traits<alloc_type>;
+        // employ user-provided allocator, since we ensured that it value_type is same as for vector,
+        // thus no need to rebound allocator
+        using allocator_type = Alloc;
+        using allocator_traits = std::allocator_traits<Alloc>;
 
         using iterator = __gnu_cxx::__normal_iterator<pointer, vector>;
         using const_iterator = __gnu_cxx::__normal_iterator<const_pointer, vector>;
@@ -49,9 +55,9 @@ namespace low
         template <typename ...Args>
         void emplace_back(Args&& ...args)
         {
-            alloc_type alloc;
+            allocator_type alloc;
             reallocate_storage_if_needed(alloc);
-            alloc_traits::construct(alloc, end_, std::forward<Args>(args)...);
+            allocator_traits::construct(alloc, end_, std::forward<Args>(args)...);
             end_ += 1u;
         }
 
@@ -59,7 +65,7 @@ namespace low
         {
             if (new_capacity > capacity())
             {
-                alloc_type alloc;
+                allocator_type alloc;
                 reallocate_storage(alloc, new_capacity, size());
             }
         }
@@ -88,7 +94,7 @@ namespace low
 
         ~vector() noexcept
         {
-            alloc_type alloc;
+            allocator_type alloc;
             release_storage(alloc);
         }
 
@@ -100,14 +106,14 @@ namespace low
             static_assert((std::is_same_v<U, value_type> && ...),
                     "if 'value' present, then it should be of 'value_type' type");
 
-            alloc_type alloc;
+            allocator_type alloc;
             const auto diff = static_cast<std::ptrdiff_t>(new_size) - static_cast<std::ptrdiff_t>(size());
             if (diff < 0)
             {
                 for (std::ptrdiff_t count{diff}; count < 0; ++count)
                 {
                     end_ -= 1u;
-                    alloc_traits::destroy(alloc, end_);
+                    allocator_traits::destroy(alloc, end_);
                 }
             }
             else if (diff > 0)
@@ -122,25 +128,25 @@ namespace low
                 }
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {
-                    alloc_traits::construct(alloc, end_, value...);
+                    allocator_traits::construct(alloc, end_, value...);
                     end_ += 1u;
                 }
             }
         }
 
-        void release_storage(alloc_type &alloc) noexcept
+        void release_storage(allocator_type &alloc) noexcept
         {
             for (auto it = begin(); it != end(); ++it)
             {
-                alloc_traits::destroy(alloc, it.base());
+                allocator_traits::destroy(alloc, it.base());
             }
-            alloc_traits::deallocate(alloc, begin_, capacity());
+            allocator_traits::deallocate(alloc, begin_, capacity());
         }
 
-        void reallocate_storage(alloc_type &alloc, std::size_t new_capacity, std::size_t new_size)
+        void reallocate_storage(allocator_type &alloc, std::size_t new_capacity, std::size_t new_size)
         {
             // allocate new storage
-            auto new_memory = alloc_traits::allocate(alloc, new_capacity);
+            auto new_memory = allocator_traits::allocate(alloc, new_capacity);
 
             // move old data in new storage
             if constexpr (std::is_nothrow_move_constructible_v<value_type>)
@@ -156,7 +162,7 @@ namespace low
             capacity_ = new_memory + new_capacity;
         }
 
-        void reallocate_storage_if_needed(alloc_type &alloc)
+        void reallocate_storage_if_needed(allocator_type &alloc)
         {
             if (auto current_size = size(); current_size == capacity())
             {
