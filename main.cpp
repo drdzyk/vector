@@ -52,7 +52,7 @@ int main() {
     std::unordered_map<int, int> d;
     std::list<int, std::allocator<int>> l;
 
-    std::vector<int, Alloc<int>> v;
+    low::vector<int, Alloc<int>> v;
     v.resize(12);
 
 //    for (const auto &e : v)
@@ -60,6 +60,7 @@ int main() {
 //        std::cout << "\ne: " << e << std::endl;
 //    }
 
+    std::cout << "\nsizeof(v): " << sizeof(v) << std::endl;
     std::cout << "\ns: " << v.size() << "; c: " << v.capacity() << std::endl;
     v.resize(9);
     std::cout << "\ns: " << v.size() << "; c: " << v.capacity() << std::endl;
