@@ -55,9 +55,8 @@ namespace low
         template <typename ...Args>
         void emplace_back(Args&& ...args)
         {
-            allocator_type alloc;
-            reallocate_storage_if_needed(alloc);
-            allocator_traits::construct(alloc, end_, std::forward<Args>(args)...);
+            reallocate_storage_if_needed();
+            allocator_traits::construct(alloc_, end_, std::forward<Args>(args)...);
             end_ += 1u;
         }
 
@@ -65,8 +64,7 @@ namespace low
         {
             if (new_capacity > capacity())
             {
-                allocator_type alloc;
-                reallocate_storage(alloc, new_capacity, size());
+                reallocate_storage(new_capacity, size());
             }
         }
 
@@ -94,8 +92,7 @@ namespace low
 
         ~vector() noexcept
         {
-            allocator_type alloc;
-            release_storage(alloc);
+            release_storage();
         }
 
     private:
@@ -106,14 +103,13 @@ namespace low
             static_assert((std::is_same_v<U, value_type> && ...),
                     "if 'value' present, then it should be of 'value_type' type");
 
-            allocator_type alloc;
             const auto diff = static_cast<std::ptrdiff_t>(new_size) - static_cast<std::ptrdiff_t>(size());
             if (diff < 0)
             {
                 for (std::ptrdiff_t count{diff}; count < 0; ++count)
                 {
                     end_ -= 1u;
-                    allocator_traits::destroy(alloc, end_);
+                    allocator_traits::destroy(alloc_, end_);
                 }
             }
             else if (diff > 0)
@@ -122,31 +118,31 @@ namespace low
                 {
                     std::size_t current_size{size()};
                     std::size_t new_capacity{current_size ? current_size * 2 : 1};
-                    reallocate_storage(alloc,
+                    reallocate_storage(
                        new_size > new_capacity ? new_size : new_capacity,
                         current_size);
                 }
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {
-                    allocator_traits::construct(alloc, end_, value...);
+                    allocator_traits::construct(alloc_, end_, value...);
                     end_ += 1u;
                 }
             }
         }
 
-        void release_storage(allocator_type &alloc) noexcept
+        void release_storage() noexcept
         {
             for (auto it = begin(); it != end(); ++it)
             {
-                allocator_traits::destroy(alloc, it.base());
+                allocator_traits::destroy(alloc_, it.base());
             }
-            allocator_traits::deallocate(alloc, begin_, capacity());
+            allocator_traits::deallocate(alloc_, begin_, capacity());
         }
 
-        void reallocate_storage(allocator_type &alloc, std::size_t new_capacity, std::size_t new_size)
+        void reallocate_storage(std::size_t new_capacity, std::size_t new_size)
         {
             // allocate new storage
-            auto new_memory = allocator_traits::allocate(alloc, new_capacity);
+            auto new_memory = allocator_traits::allocate(alloc_, new_capacity);
 
             // move old data in new storage
             if constexpr (std::is_nothrow_move_constructible_v<value_type>)
@@ -155,22 +151,23 @@ namespace low
                 std::uninitialized_copy(begin_, begin_ + new_size, new_memory);
 
             // freed old storage
-            release_storage(alloc);
+            release_storage();
 
             begin_ = new_memory;
             end_ = new_memory + new_size;
             capacity_ = new_memory + new_capacity;
         }
 
-        void reallocate_storage_if_needed(allocator_type &alloc)
+        void reallocate_storage_if_needed()
         {
             if (auto current_size = size(); current_size == capacity())
             {
                 std::size_t new_capacity{current_size ? current_size * 2 : 1};
-                reallocate_storage(alloc, new_capacity, current_size);
+                reallocate_storage(new_capacity, current_size);
             }
         }
 
+        allocator_type alloc_;
         pointer begin_{nullptr};
         pointer end_{nullptr};
         pointer capacity_{nullptr};
