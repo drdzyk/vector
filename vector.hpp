@@ -27,6 +27,8 @@ namespace low
 
         vector() = default;
 
+        explicit vector(const allocator_type &alloc) noexcept : meta_(alloc) {}
+
         vector(vector &&r) noexcept :
             meta_(r.meta_)
         {
@@ -163,8 +165,11 @@ namespace low
             }
         }
 
-        struct meta_ : allocator_type
+        struct meta : allocator_type
         {
+            meta() = default;
+            explicit meta(const allocator_type &alloc) noexcept : allocator_type(alloc) {}
+
             pointer begin_{nullptr};
             pointer end_{nullptr};
             pointer capacity_{nullptr};

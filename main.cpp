@@ -52,7 +52,7 @@ int main() {
     std::unordered_map<int, int> d;
     std::list<int, std::allocator<int>> l;
 
-    low::vector<int, Alloc<int>> v;
+    low::vector<int, Alloc<int>> v{Alloc<int>{}};
     v.resize(12);
 
 //    for (const auto &e : v)
