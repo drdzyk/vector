@@ -52,7 +52,7 @@ namespace low
         void emplace_back(Args&& ...args)
         {
             reallocate_storage_if_needed();
-            allocator_traits::construct(alloc_, meta_.end_, std::forward<Args>(args)...);
+            allocator_traits::construct(meta_, meta_.end_, std::forward<Args>(args)...);
             meta_.end_ += 1u;
         }
 
@@ -105,7 +105,7 @@ namespace low
                 for (std::ptrdiff_t count{diff}; count < 0; ++count)
                 {
                     meta_.end_ -= 1u;
-                    allocator_traits::destroy(alloc_, meta_.end_);
+                    allocator_traits::destroy(meta_, meta_.end_);
                 }
             }
             else if (diff > 0)
@@ -120,7 +120,7 @@ namespace low
                 }
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {
-                    allocator_traits::construct(alloc_, meta_.end_, value...);
+                    allocator_traits::construct(meta_, meta_.end_, value...);
                     meta_.end_ += 1u;
                 }
             }
@@ -130,15 +130,15 @@ namespace low
         {
             for (auto it = begin(); it != end(); ++it)
             {
-                allocator_traits::destroy(alloc_, it.base());
+                allocator_traits::destroy(meta_, it.base());
             }
-            allocator_traits::deallocate(alloc_, meta_.begin_, capacity());
+            allocator_traits::deallocate(meta_, meta_.begin_, capacity());
         }
 
         void reallocate_storage(std::size_t new_capacity, std::size_t new_size)
         {
             // allocate new storage
-            auto new_memory = allocator_traits::allocate(alloc_, new_capacity);
+            auto new_memory = allocator_traits::allocate(meta_, new_capacity);
 
             // move old data in new storage
             if constexpr (std::is_nothrow_move_constructible_v<value_type>)
@@ -163,8 +163,7 @@ namespace low
             }
         }
 
-        allocator_type alloc_;
-        struct Meta
+        struct meta_ : allocator_type
         {
             pointer begin_{nullptr};
             pointer end_{nullptr};
