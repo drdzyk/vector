@@ -165,6 +165,7 @@ namespace low
             }
         }
 
+        // this hack with EBO(empty base optimization) allow to reduce sizeof vector when allocator is stateless
         struct meta : allocator_type
         {
             meta() = default;
