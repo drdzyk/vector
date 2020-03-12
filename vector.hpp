@@ -88,6 +88,9 @@ namespace low
         const_iterator cbegin() const noexcept { return const_iterator{meta_.begin_}; }
         const_iterator cend() const noexcept { return const_iterator{meta_.end_}; }
 
+        // meet AllocatorAwareContainer requirements;
+        const allocator_type &get_allocator() const noexcept { return meta_; }
+
         ~vector() noexcept
         {
             release_storage();
