@@ -28,21 +28,21 @@ namespace low
         vector() = default;
 
         vector(vector &&r) noexcept :
-            storage_(r.storage_)
+            meta_(r.meta_)
         {
-            r.storage_.begin_ = nullptr;
-            r.storage_.end_ = nullptr;
-            r.storage_.capacity_ = nullptr;
+            r.meta_.begin_ = nullptr;
+            r.meta_.end_ = nullptr;
+            r.meta_.capacity_ = nullptr;
         }
 
         vector &operator=(vector &&r) noexcept
         {
             if (this != &r) // be on a safe side
             {
-                storage_ = r.storage_;
-                r.storage_.begin_ = nullptr;
-                r.storage_.end_ = nullptr;
-                r.storage_.capacity_ = nullptr;
+                meta_ = r.meta_;
+                r.meta_.begin_ = nullptr;
+                r.meta_.end_ = nullptr;
+                r.meta_.capacity_ = nullptr;
             }
 
             return *this;
@@ -52,8 +52,8 @@ namespace low
         void emplace_back(Args&& ...args)
         {
             reallocate_storage_if_needed();
-            allocator_traits::construct(alloc_, storage_.end_, std::forward<Args>(args)...);
-            storage_.end_ += 1u;
+            allocator_traits::construct(alloc_, meta_.end_, std::forward<Args>(args)...);
+            meta_.end_ += 1u;
         }
 
         void reserve(std::size_t new_capacity)
@@ -69,22 +69,22 @@ namespace low
 
         reference operator[](std::size_t idx)
         {
-            return *(storage_.begin_ + idx);
+            return *(meta_.begin_ + idx);
         }
 
         const_reference operator[](std::size_t idx) const
         {
-            return *(storage_.begin_ + idx);
+            return *(meta_.begin_ + idx);
         }
 
-        std::size_t size() const noexcept { return storage_.end_ - storage_.begin_; }
-        std::size_t capacity() const noexcept { return storage_.capacity_ - storage_.begin_; }
+        std::size_t size() const noexcept { return meta_.end_ - meta_.begin_; }
+        std::size_t capacity() const noexcept { return meta_.capacity_ - meta_.begin_; }
 
-        iterator begin() noexcept { return iterator{storage_.begin_}; }
-        iterator end() noexcept { return iterator{storage_.end_}; }
+        iterator begin() noexcept { return iterator{meta_.begin_}; }
+        iterator end() noexcept { return iterator{meta_.end_}; }
 
-        const_iterator cbegin() const noexcept { return const_iterator{storage_.begin_}; }
-        const_iterator cend() const noexcept { return const_iterator{storage_.end_}; }
+        const_iterator cbegin() const noexcept { return const_iterator{meta_.begin_}; }
+        const_iterator cend() const noexcept { return const_iterator{meta_.end_}; }
 
         ~vector() noexcept
         {
@@ -104,8 +104,8 @@ namespace low
             {
                 for (std::ptrdiff_t count{diff}; count < 0; ++count)
                 {
-                    storage_.end_ -= 1u;
-                    allocator_traits::destroy(alloc_, storage_.end_);
+                    meta_.end_ -= 1u;
+                    allocator_traits::destroy(alloc_, meta_.end_);
                 }
             }
             else if (diff > 0)
@@ -120,8 +120,8 @@ namespace low
                 }
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {
-                    allocator_traits::construct(alloc_, storage_.end_, value...);
-                    storage_.end_ += 1u;
+                    allocator_traits::construct(alloc_, meta_.end_, value...);
+                    meta_.end_ += 1u;
                 }
             }
         }
@@ -132,7 +132,7 @@ namespace low
             {
                 allocator_traits::destroy(alloc_, it.base());
             }
-            allocator_traits::deallocate(alloc_, storage_.begin_, capacity());
+            allocator_traits::deallocate(alloc_, meta_.begin_, capacity());
         }
 
         void reallocate_storage(std::size_t new_capacity, std::size_t new_size)
@@ -142,16 +142,16 @@ namespace low
 
             // move old data in new storage
             if constexpr (std::is_nothrow_move_constructible_v<value_type>)
-                std::uninitialized_move(storage_.begin_, storage_.begin_ + new_size, new_memory);
+                std::uninitialized_move(meta_.begin_, meta_.begin_ + new_size, new_memory);
             else
-                std::uninitialized_copy(storage_.begin_, storage_.begin_ + new_size, new_memory);
+                std::uninitialized_copy(meta_.begin_, meta_.begin_ + new_size, new_memory);
 
             // freed old storage
             release_storage();
 
-            storage_.begin_ = new_memory;
-            storage_.end_ = new_memory + new_size;
-            storage_.capacity_ = new_memory + new_capacity;
+            meta_.begin_ = new_memory;
+            meta_.end_ = new_memory + new_size;
+            meta_.capacity_ = new_memory + new_capacity;
         }
 
         void reallocate_storage_if_needed()
@@ -164,11 +164,11 @@ namespace low
         }
 
         allocator_type alloc_;
-        struct Storage
+        struct Meta
         {
             pointer begin_{nullptr};
             pointer end_{nullptr};
             pointer capacity_{nullptr};
-        } storage_;
+        } meta_;
     };
 }
