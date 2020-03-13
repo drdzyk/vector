@@ -91,6 +91,15 @@ namespace low
         // meet AllocatorAwareContainer requirements;
         const allocator_type &get_allocator() const noexcept { return meta_; }
 
+        void clear() noexcept
+        {
+            for (auto it = begin(); it != end(); ++it)
+            {
+                allocator_traits::destroy(meta_, it.base());
+            }
+            meta_.end_ = meta_.begin_;
+        }
+
         ~vector() noexcept
         {
             release_storage();
@@ -133,10 +142,7 @@ namespace low
 
         void release_storage() noexcept
         {
-            for (auto it = begin(); it != end(); ++it)
-            {
-                allocator_traits::destroy(meta_, it.base());
-            }
+            clear();
             allocator_traits::deallocate(meta_, meta_.begin_, capacity());
         }
 

@@ -14,6 +14,7 @@
 // 4) test_exceptions.cpp: add std::vector
 // 5) check AllocatorAwareContainer, Container, etc
 // 6) check pocma, pocca
+// 7) if value_type dtor throws -> terminate now(~vector() noexcept)
 
 template <typename T>
 struct A {};
