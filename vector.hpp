@@ -143,7 +143,12 @@ namespace low
         void release_storage() noexcept
         {
             clear();
-            allocator_traits::deallocate(meta_, meta_.begin_, capacity());
+            if (meta_.begin_) // don't deallocate nullptr
+            {
+                // std::allocator requires that pointer should be previously allocated by 'allocate',
+                // despite the fact that operator delete is ok with nullptr
+                allocator_traits::deallocate(meta_, meta_.begin_, capacity());
+            }
         }
 
         void reallocate_storage(std::size_t new_capacity, std::size_t new_size)
