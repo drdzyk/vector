@@ -14,7 +14,8 @@
 // 4) test_exceptions.cpp: add std::vector
 // 5) check AllocatorAwareContainer, Container, etc
 // 6) check pocma, pocca
-// 7) if value_type dtor throws -> terminate now(~vector() noexcept)
+// 7) if value_type dtor throws -> terminate now(~vector() noexcept); same for clear(), shrink_to_fit()
+// 8) emplace_back should return reference
 
 template <typename T>
 struct A {};

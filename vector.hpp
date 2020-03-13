@@ -81,6 +81,7 @@ namespace low
 
         std::size_t size() const noexcept { return meta_.end_ - meta_.begin_; }
         std::size_t capacity() const noexcept { return meta_.capacity_ - meta_.begin_; }
+        bool empty() const noexcept { return size() == 0u; }
 
         iterator begin() noexcept { return iterator{meta_.begin_}; }
         iterator end() noexcept { return iterator{meta_.end_}; }
