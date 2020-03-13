@@ -328,6 +328,43 @@ TYPED_TEST(VectorTest, resize_scale_std_vector)
     test_resize_scale<std::vector<TypeParam>>();
 }
 
+template <typename Vector>
+void test_clear()
+{
+    Vector v;
+
+    v.emplace_back(7);
+    v.emplace_back(8);
+    v.emplace_back(9);
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.capacity(), 4);
+
+    v.clear();
+    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.capacity(), 4);
+
+    v.clear(); // double clear() ok
+    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.capacity(), 4);
+
+    v.emplace_back(7);
+    v.emplace_back(8);
+    ASSERT_EQ(v.size(), 2);
+    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v[0], 7);
+    ASSERT_EQ(v[1], 8);
+}
+
+TYPED_TEST(VectorTest, clear)
+{
+    test_clear<low::vector<TypeParam>>();
+}
+
+TYPED_TEST(VectorTest, clear_std_vector)
+{
+    test_clear<std::vector<TypeParam>>();
+}
+
 template <typename T>
 void assert_content_eq(const std::vector<T> &src, const low::vector<T> &v2)
 {
