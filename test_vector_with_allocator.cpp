@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 #include "vector.hpp"
 
-struct Tracker
+struct GlobalTracker
 {
     std::size_t ctor{0}, copy_ctor{0}, move_ctor{0}, copy_assign{0}, move_assign{0}, dtor{0};
 
-    bool operator==(const Tracker&r) const noexcept
+    bool operator==(const GlobalTracker &r) const noexcept
     {
         return ctor == r.ctor &&
                copy_ctor == r.copy_ctor &&
@@ -66,7 +66,7 @@ protected:
 TEST_F(VectorWithAllocatorTest, default_ctor)
 {
     low::vector<int, tracked_allocator<int>> v;
-    ASSERT_EQ(global_tracker, (Tracker{.ctor = 1}));
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1}));
 }
 
 TEST_F(VectorWithAllocatorTest, ctor_with_allocator)
@@ -74,5 +74,5 @@ TEST_F(VectorWithAllocatorTest, ctor_with_allocator)
     tracked_allocator<int> alloc;
     low::vector<int, tracked_allocator<int>> v{alloc};
 
-    ASSERT_EQ(global_tracker, (Tracker{.ctor = 1, .copy_ctor = 1}));
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .copy_ctor = 1}));
 }
