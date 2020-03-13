@@ -389,6 +389,21 @@ TYPED_TEST(VectorTest, emplace_back_regress)
     }
 }
 
+TYPED_TEST(VectorTest, empty_and_size)
+{
+    low::vector<TypeParam> v;
+    ASSERT_TRUE(v.empty());
+    ASSERT_EQ(v.size(), 0);
+
+    v.emplace_back(7);
+    ASSERT_FALSE(v.empty());
+    ASSERT_EQ(v.size(), 1);
+
+    v.clear();
+    ASSERT_TRUE(v.empty());
+    ASSERT_EQ(v.size(), 0);
+}
+
 TYPED_TEST(VectorTest, vector_move_constructor)
 {
     low::vector<TypeParam> source;
