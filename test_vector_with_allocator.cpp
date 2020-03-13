@@ -101,15 +101,15 @@ TEST_F(VectorWithAllocatorTest, track_allocations)
     low::vector<int, tracked_allocator<int>> v;
     ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1}));
     v.emplace_back(7);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 1, .dealloc = 1})); // TODO: there shouldn't be deallocation
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 1, .dealloc = 0}));
     v.emplace_back(8);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 2}));
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 1}));
     v.resize(0);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 2}));
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 1}));
     v.resize(2);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 2}));
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 1}));
     v.reserve(10);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 3}));
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 2}));
     v.clear(); // don't freed the storage;
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 3}));
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 2}));
 }
