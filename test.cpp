@@ -365,6 +365,41 @@ TYPED_TEST(VectorTest, clear_std_vector)
     test_clear<std::vector<TypeParam>>();
 }
 
+template <typename Vector>
+void test_shrink_to_fit()
+{
+    Vector v;
+    v.shrink_to_fit();
+    v.shrink_to_fit(); // double shrink_to_fit() is ok
+
+    v.emplace_back(7);
+    v.emplace_back(8);
+    v.emplace_back(9);
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.capacity(), 4);
+
+    v.shrink_to_fit(); // nothing changed on non-empty container
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.capacity(), 4);
+
+    v.clear();
+    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.capacity(), 4);
+
+    v.shrink_to_fit();
+    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.capacity(), 0);
+
+    v.shrink_to_fit(); // double shrink_to_fit() is ok
+    ASSERT_EQ(v.size(), 0);
+    ASSERT_EQ(v.capacity(), 0);
+}
+
+TYPED_TEST(VectorTest, shrink_to_fit)
+{
+    test_shrink_to_fit<low::vector<TypeParam>>();
+}
+
 template <typename T>
 void assert_content_eq(const std::vector<T> &src, const low::vector<T> &v2)
 {

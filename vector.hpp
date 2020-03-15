@@ -101,10 +101,9 @@ namespace low
             meta_.end_ = meta_.begin_;
         }
 
-        ~vector() noexcept
-        {
-            release_storage();
-        }
+        void shrink_to_fit() noexcept { if (empty()) release_storage(); }
+
+        ~vector() noexcept { release_storage(); }
 
     private:
         template <typename ...U>
@@ -149,6 +148,9 @@ namespace low
                 // std::allocator requires that pointer should be previously allocated by 'allocate',
                 // despite the fact that operator delete is ok with nullptr
                 allocator_traits::deallocate(meta_, meta_.begin_, capacity());
+                meta_.begin_ = nullptr;
+                meta_.end_ = nullptr;
+                meta_.capacity_ = nullptr;
             }
         }
 
