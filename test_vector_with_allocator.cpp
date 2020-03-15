@@ -112,4 +112,6 @@ TEST_F(VectorWithAllocatorTest, track_allocations)
     ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 2}));
     v.clear(); // don't freed the storage;
     ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 2}));
+    v.shrink_to_fit(); // and now freed it
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 3}));
 }
