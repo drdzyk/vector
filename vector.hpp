@@ -101,7 +101,17 @@ namespace low
             meta_.end_ = meta_.begin_;
         }
 
-        void shrink_to_fit() noexcept { if (empty()) release_storage(); }
+        void shrink_to_fit() noexcept
+        {
+            if (std::size_t current_size = size(); current_size == 0u)
+            {
+                release_storage();
+            }
+            else if (current_size != capacity())
+            {
+                reallocate_storage(current_size, current_size);
+            }
+        }
 
         ~vector() noexcept { release_storage(); }
 

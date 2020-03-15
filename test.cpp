@@ -378,13 +378,17 @@ void test_shrink_to_fit()
     ASSERT_EQ(v.size(), 3);
     ASSERT_EQ(v.capacity(), 4);
 
-    v.shrink_to_fit(); // nothing changed on non-empty container
+    v.shrink_to_fit();
     ASSERT_EQ(v.size(), 3);
-    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v.capacity(), 3);
+
+    v.shrink_to_fit(); // nothing changed
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.capacity(), 3);
 
     v.clear();
     ASSERT_EQ(v.size(), 0);
-    ASSERT_EQ(v.capacity(), 4);
+    ASSERT_EQ(v.capacity(), 3);
 
     v.shrink_to_fit();
     ASSERT_EQ(v.size(), 0);
@@ -398,6 +402,10 @@ void test_shrink_to_fit()
 TYPED_TEST(VectorTest, shrink_to_fit)
 {
     test_shrink_to_fit<low::vector<TypeParam>>();
+}
+TYPED_TEST(VectorTest, shrink_to_fit_std_vector)
+{
+    test_shrink_to_fit<std::vector<TypeParam>>();
 }
 
 template <typename T>
