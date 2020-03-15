@@ -478,6 +478,38 @@ TYPED_TEST(VectorTest, vector_move_assignment_operator)
     ASSERT_EQ(copy[1], 8);
 }
 
+TYPED_TEST(VectorTest, vector_initializer_list)
+{
+    {
+        std::initializer_list<TypeParam> list;
+        low::vector<TypeParam> v{list};
+        ASSERT_TRUE(v.empty());
+    }
+    {
+        std::initializer_list<TypeParam> list{7};
+        low::vector<TypeParam> v{list};
+        ASSERT_EQ(v.size(), 1);
+        ASSERT_EQ(v.capacity(), 1);
+        ASSERT_EQ(v[0], 7);
+    }
+    {
+        std::initializer_list<TypeParam> list{7, 8};
+        low::vector<TypeParam> v{list};
+        ASSERT_EQ(v.size(), 2);
+        ASSERT_EQ(v.capacity(), 2);
+        ASSERT_EQ(v[0], 7);
+        ASSERT_EQ(v[1], 8);
+    }
+    {
+        low::vector<TypeParam> v{1, 2, 3};
+        ASSERT_EQ(v.size(), 3);
+        ASSERT_EQ(v.capacity(), 3);
+        ASSERT_EQ(v[0], 1);
+        ASSERT_EQ(v[1], 2);
+        ASSERT_EQ(v[2], 3);
+    }
+}
+
 TEST(VectorTest, sizeof_vector_with_stateless_allocator)
 {
     // we employ EBO(empty base optimization) for stateless allocator
