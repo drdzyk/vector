@@ -122,10 +122,7 @@ TYPED_TEST(VectorTest, const_iterator)
 
 TYPED_TEST(VectorTest, range_based_for)
 {
-    low::vector<TypeParam> v;
-    v.emplace_back(7);
-    v.emplace_back(8);
-    v.emplace_back(9);
+    low::vector<TypeParam> v{7, 8, 9};
 
     auto it = v.begin();
     for (const auto &e : v)
