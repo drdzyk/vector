@@ -63,7 +63,7 @@ private:
     const std::shared_ptr<Tracker> tracker_;
 };
 
-TEST(VectorExceptionsTest, reserve_throwing_move_ctor)
+TEST(MoveIfNoexceptTest, reserve_throwing_move_ctor)
 {
     const auto tracker = std::make_shared<Tracker>();
     low::vector<A<>> v;
@@ -75,7 +75,7 @@ TEST(VectorExceptionsTest, reserve_throwing_move_ctor)
     ASSERT_EQ(*tracker, (Tracker{.ctor = 1, .copy_ctor = 1, .dtor = 1}));
 }
 
-TEST(VectorExceptionsTest, reserve_noexcept_move_ctor)
+TEST(MoveIfNoexceptTest, reserve_noexcept_move_ctor)
 {
     const auto tracker = std::make_shared<Tracker>();
     low::vector<A<NoexceptMoveCtorTag>> v;
@@ -87,7 +87,7 @@ TEST(VectorExceptionsTest, reserve_noexcept_move_ctor)
     ASSERT_EQ(*tracker, (Tracker{.ctor = 1, .move_ctor = 1, .dtor = 1}));
 }
 
-TEST(VectorExceptionsTest, resize_throwing_move_ctor)
+TEST(MoveIfNoexceptTest, resize_throwing_move_ctor)
 {
     const auto tracker = std::make_shared<Tracker>();
     low::vector<A<>> v;
@@ -99,7 +99,7 @@ TEST(VectorExceptionsTest, resize_throwing_move_ctor)
     ASSERT_EQ(*tracker, (Tracker{.ctor = 2, .copy_ctor = 2, .dtor = 2}));
 }
 
-TEST(VectorExceptionsTest, resize_noexcept_move_ctor)
+TEST(MoveIfNoexceptTest, resize_noexcept_move_ctor)
 {
     const auto tracker = std::make_shared<Tracker>();
     low::vector<A<NoexceptMoveCtorTag>> v;

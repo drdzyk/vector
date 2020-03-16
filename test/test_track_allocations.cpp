@@ -76,19 +76,19 @@ struct tracked_allocator
     }
 };
 
-class VectorWithAllocatorTest : public testing::Test
+class TrackAllocationsTest : public testing::Test
 {
 protected:
     void SetUp() override { global_tracker.clear(); }
 };
 
-TEST_F(VectorWithAllocatorTest, default_ctor)
+TEST_F(TrackAllocationsTest, default_ctor)
 {
     low::vector<int, tracked_allocator<int>> v;
     ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1}));
 }
 
-TEST_F(VectorWithAllocatorTest, ctor_with_allocator)
+TEST_F(TrackAllocationsTest, ctor_with_allocator)
 {
     tracked_allocator<int> alloc;
     low::vector<int, tracked_allocator<int>> v{alloc};
@@ -96,7 +96,7 @@ TEST_F(VectorWithAllocatorTest, ctor_with_allocator)
     ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .copy_ctor = 1}));
 }
 
-TEST_F(VectorWithAllocatorTest, track_allocations)
+TEST_F(TrackAllocationsTest, track_allocations)
 {
     low::vector<int, tracked_allocator<int>> v;
     ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1}));
