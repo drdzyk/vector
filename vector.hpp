@@ -31,7 +31,7 @@ namespace low
         explicit vector(const allocator_type &alloc) noexcept : meta_(alloc) {}
 
         vector(vector &&r) noexcept :
-            meta_(r.meta_)
+            meta_(std::move(r.meta_))
         {
             r.meta_.begin_ = nullptr;
             r.meta_.end_ = nullptr;
