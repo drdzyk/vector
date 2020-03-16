@@ -7,11 +7,11 @@ add_compile_options(
     -fsanitize=address
 )
 
-add_executable(vector main.cpp)
-target_link_libraries(vector -fsanitize=address)
+add_executable(main main.cpp)
+target_link_libraries(main -fsanitize=address)
 
 find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
 
-add_executable(unit_test test.cpp test_exceptions.cpp test_vector_with_allocator.cpp)
-target_link_libraries(unit_test ${GTEST_BOTH_LIBRARIES} gtest -fsanitize=address  pthread)
+add_executable(unit_test test/test.cpp test/test_move_if_noexcept.cpp test/test_track_allocations.cpp)
+target_link_libraries(unit_test PRIVATE ${GTEST_BOTH_LIBRARIES} pthread -fsanitize=address)
+target_include_directories(unit_test PRIVATE ${CMAKE_SOURCE_DIR})
