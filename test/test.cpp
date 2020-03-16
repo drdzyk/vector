@@ -81,7 +81,7 @@ TYPED_TEST(VectorTest, emplace_back)
     ASSERT_EQ(v[2], 9);
 }
 
-TYPED_TEST(VectorTest, iterator)
+TYPED_TEST(VectorTest, begin_end)
 {
     low::vector<TypeParam> v;
     ASSERT_EQ(v.begin(), v.end());
@@ -102,8 +102,18 @@ TYPED_TEST(VectorTest, iterator)
     ASSERT_EQ(*std::next(v.begin()), 8);
 }
 
+TYPED_TEST(VectorTest, begin_end_const_overloads)
+{
+    const low::vector<TypeParam> v{7, 8, 9};
 
-TYPED_TEST(VectorTest, const_iterator)
+    ASSERT_NE(v.cbegin(), v.cend());
+    ASSERT_EQ(std::distance(v.cbegin(), v.cend()), 3);
+    ASSERT_EQ(*v.begin(), 7);
+    ASSERT_EQ(*std::next(v.begin()), 8);
+    ASSERT_EQ(*std::next(v.begin(), 2), 9);
+}
+
+TYPED_TEST(VectorTest, cbegin_cend)
 {
     low::vector<TypeParam> v;
     ASSERT_EQ(v.cbegin(), v.cend());

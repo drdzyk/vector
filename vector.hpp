@@ -96,6 +96,9 @@ namespace low
         iterator begin() noexcept { return iterator{meta_.begin_}; }
         iterator end() noexcept { return iterator{meta_.end_}; }
 
+        const_iterator begin() const noexcept { return const_iterator{meta_.begin_}; }
+        const_iterator end() const noexcept { return const_iterator{meta_.end_}; }
+
         const_iterator cbegin() const noexcept { return const_iterator{meta_.begin_}; }
         const_iterator cend() const noexcept { return const_iterator{meta_.end_}; }
 
