@@ -114,6 +114,15 @@ TEST_F(TrackAllocationsTest, move_ctor)
     ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .move_ctor = 1}));
 }
 
+TEST_F(TrackAllocationsTest, move_assign_operator)
+{
+    low::vector<int, tracked_allocator<int>> source, copy;
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 2}));
+
+    copy = std::move(source);
+    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 2, .move_assign = 1}));
+}
+
 TEST_F(TrackAllocationsTest, track_allocations)
 {
     low::vector<int, tracked_allocator<int>> v;
