@@ -485,6 +485,19 @@ TYPED_TEST(VectorTest, vector_move_assignment_operator)
     ASSERT_EQ(copy[1], 8);
 }
 
+TYPED_TEST(VectorTest, vector_copy_constructor)
+{
+  low::vector<TypeParam> source;
+  source.emplace_back(7);
+  source.emplace_back(8);
+  ASSERT_EQ(source[0], 7);
+  ASSERT_EQ(source[1], 8);
+
+  auto copy = source;
+  ASSERT_EQ(copy[0], 7);
+  ASSERT_EQ(copy[1], 8);
+}
+
 TYPED_TEST(VectorTest, vector_initializer_list)
 {
     {

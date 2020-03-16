@@ -51,6 +51,15 @@ namespace low
             return *this;
         }
 
+        vector(const vector &r)
+        {
+            reserve(r.size());
+            for (const auto &value : r)
+            {
+                emplace_back(value);
+            }
+        }
+
         vector(const std::initializer_list<value_type> &list)
         {
             reserve(list.size());
