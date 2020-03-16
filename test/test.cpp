@@ -475,7 +475,7 @@ TYPED_TEST(VectorTest, vector_move_assignment_operator)
     ASSERT_EQ(source[0], 7);
     ASSERT_EQ(source[1], 8);
 
-    low::vector<TypeParam> copy;
+    low::vector<TypeParam> copy{1, 2, 3};
     copy = std::move(source);
     ASSERT_EQ(copy[0], 7);
     ASSERT_EQ(copy[1], 8);

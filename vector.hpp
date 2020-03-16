@@ -42,6 +42,7 @@ namespace low
         {
             if (this != &r) // be on a safe side
             {
+                release_storage();
                 meta_ = std::move(r.meta_);
                 r.meta_.begin_ = nullptr;
                 r.meta_.end_ = nullptr;
