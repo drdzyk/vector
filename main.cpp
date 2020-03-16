@@ -16,7 +16,7 @@
 // 6) check pocma, pocca
 // 7) if value_type dtor throws -> terminate now(~vector() noexcept); same for clear(), shrink_to_fit()
 // 8) emplace_back should return reference
-// 9) resize(0) don't destruct first element
+// 9) add operator ==()
 
 template <typename T>
 struct A {};
