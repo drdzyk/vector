@@ -51,8 +51,14 @@ namespace low
             return *this;
         }
 
-        vector(const vector &r)
+        vector(const vector &r) :
+            meta_(r.meta_) // copy allocator
         {
+            // but not copy pointers of 'r'
+            meta_.begin_ = nullptr;
+            meta_.end_ = nullptr;
+            meta_.capacity_ = nullptr;
+
             reserve(r.size());
             for (const auto &value : r)
             {

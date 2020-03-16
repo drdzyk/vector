@@ -17,6 +17,8 @@
 // 7) if value_type dtor throws -> terminate now(~vector() noexcept); same for clear(), shrink_to_fit()
 // 8) emplace_back should return reference
 // 9) add operator ==()
+// 10) remove sanitizers from benchmark
+// 11) use catch2?
 
 template <typename T>
 struct A {};
