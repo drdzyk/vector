@@ -61,10 +61,7 @@ namespace low
             meta_.capacity_ = nullptr;
 
             reserve(r.size());
-            for (const auto &value : r)
-            {
-                emplace_back(value);
-            }
+            meta_.end_ = std::uninitialized_copy(r.meta_.begin_, r.meta_.end_, meta_.begin_);
         }
 
         vector(const std::initializer_list<value_type> &list)
