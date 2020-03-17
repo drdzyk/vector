@@ -16,7 +16,7 @@ TEST(VectorTest, sizeof_vector_with_statefull_allocator)
     {
         int i{0};
     };
-    static_assert(sizeof(alloc) == 4, "alloc contain state");
+    static_assert(sizeof(alloc) == sizeof(int), "alloc contain state");
     static_assert(alignof(low::vector<int, alloc>) == sizeof(void *), "vector aligned by pointer size");
     static_assert(sizeof(low::vector<int, alloc>) == 3 * sizeof(void *)  + alignof(low::vector<int, alloc>),
         "vector contains 3 pointer + aligned sizeof allocator");
