@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(vector)
+project(vector LANGUAGES CXX)
 
 add_compile_options(
     -std=c++17
