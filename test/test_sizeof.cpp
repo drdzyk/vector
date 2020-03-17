@@ -1,7 +1,8 @@
-#include <gtest/gtest.h>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 #include "vector.hpp"
 
-TEST(VectorTest, sizeof_vector_with_stateless_allocator)
+TEST_CASE("sizeof vector with stateless allocator", "[vector]")
 {
     // we employ EBO(empty base optimization) for stateless allocator
     using alloc = std::allocator<int>;
@@ -10,7 +11,7 @@ TEST(VectorTest, sizeof_vector_with_stateless_allocator)
     static_assert(sizeof(low::vector<int, alloc>) == 3 * sizeof(void *), "vector contains 3 pointer");
 }
 
-TEST(VectorTest, sizeof_vector_with_statefull_allocator)
+TEST_CASE("sizeof vector with stateful allocator", "[vector]")
 {
     struct alloc : std::allocator<int>
     {
