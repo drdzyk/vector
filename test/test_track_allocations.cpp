@@ -1,4 +1,7 @@
-#include <gtest/gtest.h>
+#define CATCH_CONFIG_DISABLE_MATCHERS
+#define CATCH_CONFIG_FAST_COMPILE
+#define CATCH_CONFIG_COUNTER
+#include <catch2/catch.hpp>
 #include "vector.hpp"
 
 struct GlobalTracker
@@ -76,69 +79,72 @@ struct tracked_allocator
     }
 };
 
-class TrackAllocationsTest : public testing::Test
+struct Fixture
 {
-protected:
-    void SetUp() override { global_tracker.clear(); }
+    ~Fixture() noexcept
+    {
+        global_tracker.clear();
+    }
 };
 
-TEST_F(TrackAllocationsTest, default_ctor)
+TEST_CASE_METHOD(Fixture, "default constructor")
 {
     low::vector<int, tracked_allocator<int>> v;
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1}));
 }
 
-TEST_F(TrackAllocationsTest, ctor_with_allocator)
+
+TEST_CASE_METHOD(Fixture, "constructor with allocator")
 {
     tracked_allocator<int> alloc;
     low::vector<int, tracked_allocator<int>> v{alloc};
 
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .copy_ctor = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .copy_ctor = 1}));
 }
 
-TEST_F(TrackAllocationsTest, copy_ctor)
+TEST_CASE_METHOD(Fixture, "copy constructor")
 {
     low::vector<int, tracked_allocator<int>> source;
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1}));
 
     auto copy = source;
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .copy_ctor = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .copy_ctor = 1}));
 }
 
-TEST_F(TrackAllocationsTest, move_ctor)
+TEST_CASE_METHOD(Fixture, "move constructor")
 {
     low::vector<int, tracked_allocator<int>> source;
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1}));
 
     auto copy = std::move(source);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .move_ctor = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .move_ctor = 1}));
 }
 
-TEST_F(TrackAllocationsTest, move_assign_operator)
+TEST_CASE_METHOD(Fixture, "move assign operator")
 {
     low::vector<int, tracked_allocator<int>> source, copy;
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 2}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
 
     copy = std::move(source);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 2, .move_assign = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .move_assign = 1}));
 }
 
-TEST_F(TrackAllocationsTest, track_allocations)
+TEST_CASE_METHOD(Fixture, "track allocations")
 {
     low::vector<int, tracked_allocator<int>> v;
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1}));
     v.emplace_back(7);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 1, .dealloc = 0}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .alloc = 1, .dealloc = 0}));
     v.emplace_back(8);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 1}));
     v.resize(0);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 1}));
     v.resize(2);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .alloc = 2, .dealloc = 1}));
     v.reserve(10);
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 2}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 2}));
     v.clear(); // don't freed the storage;
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 2}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 2}));
     v.shrink_to_fit(); // and now freed it
-    ASSERT_EQ(global_tracker, (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 3}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .alloc = 3, .dealloc = 3}));
 }
