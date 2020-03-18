@@ -1,4 +1,7 @@
-#include <gtest/gtest.h>
+#define CATCH_CONFIG_DISABLE_MATCHERS
+#define CATCH_CONFIG_FAST_COMPILE
+#define CATCH_CONFIG_COUNTER
+#include <catch2/catch.hpp>
 #include <vector>
 #include "vector.hpp"
 
@@ -63,50 +66,54 @@ private:
     const std::shared_ptr<Tracker> tracker_;
 };
 
-TEST(MoveIfNoexceptTest, reserve_throwing_move_ctor)
+TEMPLATE_PRODUCT_TEST_CASE("reserve on throwing move ctor", "[low::vector][std::vector]",
+                           (low::vector, std::vector), (A<>))
+{
+    const auto tracker = std::make_shared<Tracker>();
+    TestType v;
+
+    v.emplace_back(tracker);
+    REQUIRE(*tracker == (Tracker{.ctor = 1}));
+
+    v.reserve(2);
+    REQUIRE(*tracker == (Tracker{.ctor = 1, .copy_ctor = 1, .dtor = 1}));
+}
+
+TEMPLATE_PRODUCT_TEST_CASE("reserve on noexcept move ctor", "[low::vector][std::vector]",
+                           (low::vector, std::vector), (A<NoexceptMoveCtorTag>))
+{
+    const auto tracker = std::make_shared<Tracker>();
+    TestType v;
+
+    v.emplace_back(tracker);
+    REQUIRE(*tracker ==(Tracker{.ctor = 1}));
+
+    v.reserve(2);
+    REQUIRE(*tracker == (Tracker{.ctor = 1, .move_ctor = 1, .dtor = 1}));
+}
+
+TEMPLATE_PRODUCT_TEST_CASE("resize on throwing move ctor", "[low::vector][std::vector]",
+                           (low::vector, std::vector), (A<>))
 {
     const auto tracker = std::make_shared<Tracker>();
     low::vector<A<>> v;
 
     v.emplace_back(tracker);
-    ASSERT_EQ(*tracker, (Tracker{.ctor = 1}));
+    REQUIRE(*tracker == (Tracker{.ctor = 1}));
 
-    v.reserve(2);
-    ASSERT_EQ(*tracker, (Tracker{.ctor = 1, .copy_ctor = 1, .dtor = 1}));
+    v.resize(2, tracker);
+    REQUIRE(*tracker == (Tracker{.ctor = 2, .copy_ctor = 2, .dtor = 2}));
 }
 
-TEST(MoveIfNoexceptTest, reserve_noexcept_move_ctor)
+TEMPLATE_PRODUCT_TEST_CASE("resize on noexcept move ctor", "[low::vector][std::vector]",
+                           (low::vector, std::vector), (A<NoexceptMoveCtorTag>))
 {
     const auto tracker = std::make_shared<Tracker>();
     low::vector<A<NoexceptMoveCtorTag>> v;
 
     v.emplace_back(tracker);
-    ASSERT_EQ(*tracker, (Tracker{.ctor = 1}));
-
-    v.reserve(2);
-    ASSERT_EQ(*tracker, (Tracker{.ctor = 1, .move_ctor = 1, .dtor = 1}));
-}
-
-TEST(MoveIfNoexceptTest, resize_throwing_move_ctor)
-{
-    const auto tracker = std::make_shared<Tracker>();
-    low::vector<A<>> v;
-
-    v.emplace_back(tracker);
-    ASSERT_EQ(*tracker, (Tracker{.ctor = 1}));
+    REQUIRE(*tracker == (Tracker{.ctor = 1}));
 
     v.resize(2, tracker);
-    ASSERT_EQ(*tracker, (Tracker{.ctor = 2, .copy_ctor = 2, .dtor = 2}));
-}
-
-TEST(MoveIfNoexceptTest, resize_noexcept_move_ctor)
-{
-    const auto tracker = std::make_shared<Tracker>();
-    low::vector<A<NoexceptMoveCtorTag>> v;
-
-    v.emplace_back(tracker);
-    ASSERT_EQ(*tracker, (Tracker{.ctor = 1}));
-
-    v.resize(2, tracker);
-    ASSERT_EQ(*tracker, (Tracker{.ctor = 2, .copy_ctor = 1, .move_ctor = 1, .dtor = 2}));
+    REQUIRE(*tracker == (Tracker{.ctor = 2, .copy_ctor = 1, .move_ctor = 1, .dtor = 2}));
 }
