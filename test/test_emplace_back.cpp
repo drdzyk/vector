@@ -32,8 +32,7 @@ TEMPLATE_PRODUCT_TEST_CASE("emplace_back", "[low::vector][std::vector]",
     REQUIRE(v[2] == 9);
 }
 
-template <typename T>
-void assert_content_eq(const std::vector<T> &src, const low::vector<T> &v2)
+void assert_content_eq(const std::vector<int> &src, const low::vector<int> &v2)
 {
     REQUIRE(src.size() == v2.size());
     REQUIRE(src.capacity() == v2.capacity());
@@ -43,10 +42,10 @@ void assert_content_eq(const std::vector<T> &src, const low::vector<T> &v2)
     }
 }
 
-TEMPLATE_TEST_CASE("emplace_back scale", "[low::vector][std::vector]", int, double, DynamicInt)
+TEST_CASE("emplace_back scale", "[low::vector][std::vector]")
 {
-    std::vector<TestType> v1;
-    low::vector<TestType> v2;
+    std::vector<int> v1;
+    low::vector<int> v2;
 
     for (std::size_t idx{0}; idx < 100; ++idx)
     {
