@@ -44,19 +44,3 @@ TEMPLATE_PRODUCT_TEST_CASE("reserve", "[low::vector][std::vector]",
         REQUIRE(v.capacity() == 11);
     }
 }
-
-TEMPLATE_PRODUCT_TEST_CASE("empty, size", "[low::vector][std::vector]",
-                           (low::vector, std::vector), (int, double, DynamicInt))
-{
-    TestType v;
-    REQUIRE(v.empty());
-    REQUIRE(v.size() == 0);
-
-    v.emplace_back(7);
-    REQUIRE_FALSE(v.empty());
-    REQUIRE(v.size() == 1);
-
-    v.clear();
-    REQUIRE(v.empty());
-    REQUIRE(v.size() == 0);
-}

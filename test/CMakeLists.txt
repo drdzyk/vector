@@ -8,6 +8,7 @@ add_executable(unit_test
     test_iterators.cpp
     test_move_if_noexcept.cpp
     test_resize.cpp
+    test_size.cpp
     test_sizeof.cpp
     test_shrink_to_fit.cpp
     test_track_allocations.cpp
