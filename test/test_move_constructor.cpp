@@ -6,7 +6,17 @@
 #include "vector.hpp"
 #include "DynamicInt.hpp"
 
-TEMPLATE_PRODUCT_TEST_CASE("vector move constructor", "[low::vector][std::vector]",
+TEMPLATE_PRODUCT_TEST_CASE("move from empty source", "[low::vector][std::vector]",
+                           (low::vector, std::vector), (int, double, DynamicInt))
+{
+    TestType source;
+    REQUIRE(source.empty());
+
+    auto copy = std::move(source);
+    REQUIRE(copy.empty());
+}
+
+TEMPLATE_PRODUCT_TEST_CASE("move constructor", "[low::vector][std::vector]",
                            (low::vector, std::vector), (int, double, DynamicInt))
 {
     TestType source;
