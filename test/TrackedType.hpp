@@ -17,6 +17,18 @@ struct TypeTracker
     }
 };
 
+// make Catch2 reports about assertion failure more verbose
+inline std::ostream& operator << (std::ostream& os, const TypeTracker &t)
+{
+    os << "ctor: " << t.ctor
+       << "; copy_ctor: " << t.copy_ctor
+       << "; move_ctor: " << t.move_ctor
+       << "; copy_assign: " << t.copy_assign
+       << "; move_assign: " << t.move_assign
+       << "; dtor: " << t.dtor;
+    return os;
+}
+
 struct NoexceptCtorTag{};
 struct NoexceptCopyCtorTag{};
 struct NoexceptMoveCtorTag{};

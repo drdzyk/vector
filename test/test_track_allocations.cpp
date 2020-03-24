@@ -35,6 +35,7 @@ struct GlobalTracker
     }
 } global_tracker;
 
+// make Catch2 reports about assertion failure more verbose
 std::ostream& operator << (std::ostream& os, const GlobalTracker &t)
 {
     os << "ctor: " << t.ctor
