@@ -5,6 +5,7 @@
 #include <vector>
 #include "vector.hpp"
 #include "DynamicInt.hpp"
+#include "ComparableAllocator.hpp"
 
 TEMPLATE_PRODUCT_TEST_CASE("move constructor", "[low::vector][std::vector]",
                            (low::vector, std::vector), (int, double, DynamicInt))
@@ -27,32 +28,6 @@ TEMPLATE_PRODUCT_TEST_CASE("move constructor", "[low::vector][std::vector]",
         REQUIRE(copy[0] == 7);
         REQUIRE(copy[1] == 8);
     }
-}
-
-namespace
-{
-    template <typename T>
-    struct ComparableAllocator
-    {
-        using value_type = T;
-
-        T *allocate(std::size_t n) { return std::allocator<T>{}.allocate(n); }
-        void deallocate(T *p, std::size_t s) { std::allocator<T>{}.deallocate(p, s); }
-    };
-
-    template <typename T>
-    struct EqualAllocator : ComparableAllocator<T>
-    {
-        friend bool operator==(const EqualAllocator&, const EqualAllocator&) noexcept { return true; }
-        friend bool operator!=(const EqualAllocator&l, const EqualAllocator&r) noexcept { return !(l == r); }
-    };
-
-    template <typename T>
-    struct NotEqualAllocator : ComparableAllocator<T>
-    {
-        friend bool operator==(const NotEqualAllocator&, const NotEqualAllocator&) noexcept { return false; }
-        friend bool operator!=(const NotEqualAllocator&l, const NotEqualAllocator&r) noexcept { return !(l == r); }
-    };
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor", "[low::vector][std::vector]",
