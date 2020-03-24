@@ -2,6 +2,7 @@
 #define CATCH_CONFIG_FAST_COMPILE
 #define CATCH_CONFIG_COUNTER
 #include <catch2/catch.hpp>
+#include <sstream>
 #include "vector.hpp"
 
 struct GlobalTracker
@@ -34,7 +35,20 @@ struct GlobalTracker
     }
 } global_tracker;
 
-template <typename T>
+std::ostream& operator << (std::ostream& os, const GlobalTracker &t)
+{
+    os << "ctor: " << t.ctor
+       << "; copy_ctor: " << t.copy_ctor
+       << "; move_ctor: " << t.move_ctor
+       << "; copy_assign: " << t.copy_assign
+       << "; move_assign: " << t.move_assign
+       << "; dtor: " << t.dtor
+       << "; alloc: " << t.alloc
+       << "; dealloc: " << t.dealloc;
+    return os;
+}
+
+template <typename T, bool isEqual = true>
 struct tracked_allocator
 {
     using value_type = T;
@@ -77,6 +91,9 @@ struct tracked_allocator
     {
         ++global_tracker.dtor;
     }
+
+    friend bool operator ==(const tracked_allocator &, const tracked_allocator &) noexcept { return isEqual; }
+    friend bool operator !=(const tracked_allocator &l, const tracked_allocator &r) noexcept { return !(l == r); }
 };
 
 struct Fixture
@@ -118,6 +135,30 @@ TEST_CASE_METHOD(Fixture, "move constructor")
 
     auto copy = std::move(source);
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .move_ctor = 1}));
+}
+
+TEST_CASE_METHOD(Fixture, "allocator-extended move constructor with equal allocators")
+{
+    using EqualAlloc = tracked_allocator<int, true>;
+    low::vector<int, EqualAlloc> source;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1}));
+
+    EqualAlloc other;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+    low::vector<int, EqualAlloc> copy{std::move(source), other};
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 3, .copy_ctor = 1, .dtor = 1}));
+}
+
+TEST_CASE_METHOD(Fixture, "allocator-extended move constructor with not equal allocators")
+{
+    using NotEqualAlloc = tracked_allocator<int, false>;
+    low::vector<int, NotEqualAlloc> source;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1}));
+
+    NotEqualAlloc other;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+    low::vector<int, NotEqualAlloc> copy{std::move(source), other};
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 3, .copy_ctor = 1, .dtor = 1}));
 }
 
 TEST_CASE_METHOD(Fixture, "move assign operator")

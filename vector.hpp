@@ -38,22 +38,20 @@ namespace low
             r.meta_.capacity_ = nullptr;
         }
 
-        vector(vector &&r, const allocator_type &alloc)
+        vector(vector &&r, const allocator_type &alloc) :
+            meta_(alloc)
         {
-            if (meta_ == alloc)
+            if (allocator_type{} == alloc)
             {
-                meta_ = meta{alloc};
                 meta_.begin_ = r.meta_.begin_;
                 meta_.end_ = r.meta_.end_;
                 meta_.capacity_ = r.meta_.capacity_;
-
                 r.meta_.begin_ = nullptr;
                 r.meta_.end_ = nullptr;
                 r.meta_.capacity_ = nullptr;
             }
             else
             {
-                meta_ = meta{alloc};
                 reserve(r.size());
                 meta_.end_ = std::uninitialized_move(r.meta_.begin_, r.meta_.end_, meta_.begin_);
             }
