@@ -126,7 +126,9 @@ TEST_CASE_METHOD(Fixture, "copy constructor")
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 1}));
 
     auto copy = source;
-    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .copy_ctor = 1}));
+    // +1 copy ctor and 1 dtor because of call to 'select_on_container_copy_construction()'
+    // which required by standard
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .copy_ctor = 2, .dtor = 1}));
 }
 
 TEST_CASE_METHOD(Fixture, "allocator-extended copy constructor")

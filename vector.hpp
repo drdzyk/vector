@@ -71,7 +71,9 @@ namespace low
             return *this;
         }
 
-        vector(const vector &r) : vector(r, r.get_allocator()) {}
+        vector(const vector &r) :
+            vector(r, allocator_traits::select_on_container_copy_construction(r.get_allocator()))
+        {}
 
         vector(const vector &r, const allocator_type &alloc) :
             meta_(alloc) // copy allocator
