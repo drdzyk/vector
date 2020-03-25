@@ -161,7 +161,7 @@ TEST_CASE_METHOD(Fixture, "allocator-extended move constructor with equal alloca
     EqualAlloc other;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
     low::vector<int, EqualAlloc> copy{std::move(source), other};
-    REQUIRE(global_tracker == (GlobalTracker{.ctor = 3, .copy_ctor = 1, .dtor = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .copy_ctor = 1}));
 }
 
 TEST_CASE_METHOD(Fixture, "allocator-extended move constructor with not equal allocators")
@@ -173,7 +173,7 @@ TEST_CASE_METHOD(Fixture, "allocator-extended move constructor with not equal al
     NotEqualAlloc other;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
     low::vector<int, NotEqualAlloc> copy{std::move(source), other};
-    REQUIRE(global_tracker == (GlobalTracker{.ctor = 3, .copy_ctor = 1, .dtor = 1}));
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .copy_ctor = 1}));
 }
 
 TEST_CASE_METHOD(Fixture, "move assign operator")

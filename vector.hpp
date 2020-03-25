@@ -41,19 +41,22 @@ namespace low
         vector(vector &&r, const allocator_type &alloc) :
             meta_(alloc)
         {
-            if (allocator_type{} == alloc)
+            if (r.get_allocator() != alloc) // exactly this comparison required by standard,
+                // see https://en.cppreference.com/w/cpp/container/vector/vector
             {
+                // perform element-wise move of stored objects
+                reserve(r.size());
+                meta_.end_ = std::uninitialized_move(r.meta_.begin_, r.meta_.end_, meta_.begin_);
+            }
+            else
+            {
+                // just steal a pointers
                 meta_.begin_ = r.meta_.begin_;
                 meta_.end_ = r.meta_.end_;
                 meta_.capacity_ = r.meta_.capacity_;
                 r.meta_.begin_ = nullptr;
                 r.meta_.end_ = nullptr;
                 r.meta_.capacity_ = nullptr;
-            }
-            else
-            {
-                reserve(r.size());
-                meta_.end_ = std::uninitialized_move(r.meta_.begin_, r.meta_.end_, meta_.begin_);
             }
         }
 
@@ -76,7 +79,7 @@ namespace low
         {}
 
         vector(const vector &r, const allocator_type &alloc) :
-            meta_(alloc) // copy allocator
+            meta_(alloc)
         {
             reserve(r.size());
             meta_.end_ = std::uninitialized_copy(r.meta_.begin_, r.meta_.end_, meta_.begin_);

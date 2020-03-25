@@ -83,7 +83,7 @@ struct NotEqualAllocator
 //    NotEqualAllocator(const NotEqualAllocator<_Tp1>&) noexcept { }
 
     friend bool operator==(const NotEqualAllocator&, const NotEqualAllocator&) noexcept { return false; }
-//    friend bool operator!=(const NotEqualAllocator&, const NotEqualAllocator&) noexcept { return true; }
+    friend bool operator!=(const NotEqualAllocator&, const NotEqualAllocator&) noexcept { return true; }
 };
 template <typename T> class X;
 int main() {
