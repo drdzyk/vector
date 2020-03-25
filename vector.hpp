@@ -71,14 +71,11 @@ namespace low
             return *this;
         }
 
-        vector(const vector &r) :
-            meta_(r.meta_) // copy allocator
-        {
-            // but not copy pointers of 'r'
-            meta_.begin_ = nullptr;
-            meta_.end_ = nullptr;
-            meta_.capacity_ = nullptr;
+        vector(const vector &r) : vector(r, r.get_allocator()) {}
 
+        vector(const vector &r, const allocator_type &alloc) :
+            meta_(alloc) // copy allocator
+        {
             reserve(r.size());
             meta_.end_ = std::uninitialized_copy(r.meta_.begin_, r.meta_.end_, meta_.begin_);
         }
