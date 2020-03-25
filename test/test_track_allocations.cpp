@@ -129,6 +129,18 @@ TEST_CASE_METHOD(Fixture, "copy constructor")
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 1, .copy_ctor = 1}));
 }
 
+TEST_CASE_METHOD(Fixture, "allocator-extended copy constructor")
+{
+    low::vector<int, tracked_allocator<int>> source;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 1}));
+
+    tracked_allocator<int> other;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+
+    low::vector<int, tracked_allocator<int>> copy{source, other};
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .copy_ctor = 1}));
+}
+
 TEST_CASE_METHOD(Fixture, "move constructor")
 {
     low::vector<int, tracked_allocator<int>> source;
