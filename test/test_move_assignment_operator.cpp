@@ -6,26 +6,43 @@
 #include "vector.hpp"
 #include "DynamicInt.hpp"
 
-TEMPLATE_PRODUCT_TEST_CASE("vector move assignment operator", "[low::vector][std::vector]",
+TEMPLATE_PRODUCT_TEST_CASE("move assignment operator", "[low::vector][std::vector]",
                            (low::vector, std::vector), (int, double, DynamicInt))
 {
     TestType source;
-    source.emplace_back(7);
-    source.emplace_back(8);
-    REQUIRE(source[0] == 7);
-    REQUIRE(source[1] == 8);
+    TestType copy;
 
-    TestType copy{1, 2, 3};
-    copy = std::move(source);
-    REQUIRE(copy[0] == 7);
-    REQUIRE(copy[1] == 8);
-
-    using value_type = typename TestType::value_type;
-    if constexpr (std::is_same_v<TestType, low::vector<value_type>>)
+    SECTION("assign from empty source produce empty vector")
     {
-        // std::vector crashes in this case!
-        copy = std::move(copy); // check self assignment
+        copy = std::move(source);
+        REQUIRE(copy.empty());
+    }
+
+    SECTION("assign produce vector with same content")
+    {
+        source.emplace_back(7);
+        source.emplace_back(8);
+
+        copy.emplace_back(9);
+        copy.emplace_back(10);
+        copy.emplace_back(11);
+
+        copy = std::move(source);
         REQUIRE(copy[0] == 7);
         REQUIRE(copy[1] == 8);
+    }
+
+    SECTION("self assignment is ok") // but not for std::vector
+    {
+        source.emplace_back(7);
+        source.emplace_back(8);
+
+        using value_type = typename TestType::value_type;
+        if constexpr (std::is_same_v<TestType, low::vector<value_type>>)
+        {
+            source = std::move(source);
+            REQUIRE(source[0] == 7);
+            REQUIRE(source[1] == 8);
+        }
     }
 }
