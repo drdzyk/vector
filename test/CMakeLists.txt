@@ -3,6 +3,7 @@ find_package(Catch2 REQUIRED HINTS /cmake)
 add_executable(unit_test
     test_clear.cpp
     test_copy_constructor.cpp
+    test_copy_constructor_tracker.cpp
     test_emplace_back.cpp
     test_initializer_list_constructor.cpp
     test_iterators.cpp
