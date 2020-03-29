@@ -5,7 +5,7 @@
 #include <vector>
 #include "vector.hpp"
 #include "DynamicInt.hpp"
-#include "ComparableAllocator.hpp"
+#include "Allocator.hpp"
 
 TEMPLATE_PRODUCT_TEST_CASE("move constructor", "[low::vector][std::vector]",
                            (low::vector, std::vector), (int, double, DynamicInt))
@@ -32,12 +32,12 @@ TEMPLATE_PRODUCT_TEST_CASE("move constructor", "[low::vector][std::vector]",
 
 TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor", "[low::vector][std::vector]",
     (low::vector, std::vector), (
-        (int, std::allocator<int>),
-        (double, std::allocator<double>),
-        (DynamicInt, std::allocator<DynamicInt>),
-        (int, NotEqualAllocator<int>),
-        (double, NotEqualAllocator<double>),
-        (DynamicInt, NotEqualAllocator<DynamicInt>)
+        (int, alloc::Eq<int>),
+        (double, alloc::Eq<double>),
+        (DynamicInt, alloc::Eq<DynamicInt>),
+        (int, alloc::NotEq<int>),
+        (double, alloc::NotEq<double>),
+        (DynamicInt, alloc::NotEq<DynamicInt>)
     )
 )
 {
