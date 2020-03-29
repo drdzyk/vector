@@ -79,13 +79,44 @@ namespace low
 
         vector &operator=(vector &&r) noexcept
         {
-            if (this != &r) // be on a safe side
+            if (this == &r) // be on a safe side
+            {
+                return *this;
+            }
+            if (typename allocator_traits::propagate_on_container_move_assignment{})
             {
                 release_storage();
                 meta_ = std::move(r.meta_);
                 r.meta_.begin_ = nullptr;
                 r.meta_.end_ = nullptr;
                 r.meta_.capacity_ = nullptr;
+                return *this;
+            }
+            if (get_allocator() == r.get_allocator())
+            {
+                release_storage();
+                meta_.begin_ = r.meta_.begin_;
+                meta_.end_ = r.meta_.end_;
+                meta_.capacity_ = r.meta_.capacity_;
+                r.meta_.begin_ = nullptr;
+                r.meta_.end_ = nullptr;
+                r.meta_.capacity_ = nullptr;
+                return *this;
+            }
+            if (size() >= r.size())
+            {
+                auto end = std::move(r.meta_.begin_, r.meta_.end_, meta_.begin_);
+                for (auto cur = end; cur != meta_.end_; ++cur)
+                {
+                    allocator_traits::destroy(meta_, cur);
+                }
+                meta_.end_ = end;
+            }
+            else
+            {
+                release_storage();
+                reserve(r.size());
+                meta_.end_ = std::uninitialized_move(r.meta_.begin_, r.meta_.end_, meta_.begin_);
             }
 
             return *this;
