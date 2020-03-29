@@ -29,7 +29,11 @@ namespace alloc
 
     template <typename T>
     using Eq = Allocator<T, Equal::Yes, Pocma::No>;
+    template <typename T>
+    using EqPocma = Allocator<T, Equal::Yes, Pocma::Yes>;
 
     template <typename T>
     using NotEq = Allocator<T, Equal::No, Pocma::No>;
+    template <typename T>
+    using NotEqPocma = Allocator<T, Equal::No, Pocma::Yes>;
 }

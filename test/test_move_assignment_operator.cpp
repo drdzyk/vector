@@ -5,6 +5,7 @@
 #include <vector>
 #include "vector.hpp"
 #include "DynamicInt.hpp"
+#include "Allocator.hpp"
 
 TEMPLATE_PRODUCT_TEST_CASE("move assignment operator", "[low::vector][std::vector]",
                            (low::vector, std::vector), (int, double, DynamicInt))
@@ -44,5 +45,38 @@ TEMPLATE_PRODUCT_TEST_CASE("move assignment operator", "[low::vector][std::vecto
             REQUIRE(source[0] == 7);
             REQUIRE(source[1] == 8);
         }
+    }
+}
+
+TEMPLATE_PRODUCT_TEST_CASE("move assignment operator different allocators", "[low::vector][std::vector]",
+    (low::vector, std::vector), (
+        (DynamicInt, alloc::Eq<DynamicInt>),
+        (DynamicInt, alloc::EqPocma<DynamicInt>),
+        (DynamicInt, alloc::NotEq<DynamicInt>),
+        (DynamicInt, alloc::NotEqPocma<DynamicInt>)
+    )
+)
+{
+    TestType source;
+    TestType copy;
+
+    SECTION("assign from empty source produce empty vector")
+    {
+        copy = std::move(source);
+        REQUIRE(copy.empty());
+    }
+
+    SECTION("assign produce vector with same content")
+    {
+        source.emplace_back(7);
+        source.emplace_back(8);
+
+        copy.emplace_back(9);
+        copy.emplace_back(10);
+        copy.emplace_back(11);
+
+        copy = std::move(source);
+        REQUIRE(copy[0] == 7);
+        REQUIRE(copy[1] == 8);
     }
 }
