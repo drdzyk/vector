@@ -54,6 +54,12 @@ struct tracked_allocator
 {
     using value_type = T;
 
+    template<typename U>
+    struct rebind
+    {
+        using other = tracked_allocator<U, isEqual>;
+    };
+
     T *allocate(std::size_t n)
     {
         ++global_tracker.alloc;
@@ -95,6 +101,20 @@ struct tracked_allocator
 
     friend bool operator ==(const tracked_allocator &, const tracked_allocator &) noexcept { return isEqual; }
     friend bool operator !=(const tracked_allocator &l, const tracked_allocator &r) noexcept { return !(l == r); }
+};
+
+template <typename T, bool isEqual,  bool pocma>
+struct tracked_allocator_pocma : tracked_allocator<T, true>
+{
+    using value_type = T;
+
+    template<typename U>
+    struct rebind
+    {
+        using other = tracked_allocator_pocma<U, isEqual, pocma>;
+    };
+
+    using propagate_on_container_move_assignment = std::integral_constant<bool, pocma>;
 };
 
 struct Fixture
@@ -176,13 +196,31 @@ TEST_CASE_METHOD(Fixture, "allocator-extended move constructor with not equal al
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .copy_ctor = 1}));
 }
 
-TEST_CASE_METHOD(Fixture, "move assign operator")
+TEST_CASE_METHOD(Fixture, "move assign operator; pocma true")
 {
-    low::vector<int, tracked_allocator<int>> source, copy;
+    low::vector<int, tracked_allocator_pocma<int, true, true>> source, copy;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
 
     copy = std::move(source);
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .move_assign = 1}));
+}
+
+TEST_CASE_METHOD(Fixture, "move assign operator; pocma false; allocators equal")
+{
+    low::vector<int, tracked_allocator_pocma<int, true, false>> source, copy;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+
+    copy = std::move(source);
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+}
+
+TEST_CASE_METHOD(Fixture, "move assign operator; pocma false; allocators not equal")
+{
+    low::vector<int, tracked_allocator_pocma<int, false, false>> source, copy;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+
+    copy = std::move(source);
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
 }
 
 TEST_CASE_METHOD(Fixture, "track allocations")
