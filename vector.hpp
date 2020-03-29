@@ -60,20 +60,6 @@ namespace low
             }
         }
 
-        vector &operator=(vector &&r) noexcept
-        {
-            if (this != &r) // be on a safe side
-            {
-                release_storage();
-                meta_ = std::move(r.meta_);
-                r.meta_.begin_ = nullptr;
-                r.meta_.end_ = nullptr;
-                r.meta_.capacity_ = nullptr;
-            }
-
-            return *this;
-        }
-
         vector(const vector &r) :
             vector(r, allocator_traits::select_on_container_copy_construction(r.get_allocator()))
         {}
@@ -89,6 +75,20 @@ namespace low
         {
             reserve(list.size());
             meta_.end_ = std::uninitialized_copy(list.begin(), list.end(), meta_.begin_);
+        }
+
+        vector &operator=(vector &&r) noexcept
+        {
+            if (this != &r) // be on a safe side
+            {
+                release_storage();
+                meta_ = std::move(r.meta_);
+                r.meta_.begin_ = nullptr;
+                r.meta_.end_ = nullptr;
+                r.meta_.capacity_ = nullptr;
+            }
+
+            return *this;
         }
 
         template <typename ...Args>
