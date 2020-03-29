@@ -83,7 +83,7 @@ namespace low
             {
                 return *this;
             }
-            if (typename allocator_traits::propagate_on_container_move_assignment{})
+            if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
             {
                 release_storage();
                 meta_ = std::move(r.meta_);
