@@ -126,7 +126,7 @@ namespace low
         template <typename It>
         void assign(It first, It last)
         {
-            auto distance = static_cast<std::size_t>(std::distance(first, last));
+            const auto distance = static_cast<std::size_t>(std::distance(first, last));
             if (capacity() < distance)
             {
                 release_storage();
@@ -134,21 +134,14 @@ namespace low
                 meta_.end_ = std::uninitialized_move(first, last, meta_.begin_);
                 return;
             }
-            auto current_size = size();
-            if (current_size >= distance)
+
+            const It pivot = first + std::min(size(), distance);
+            const pointer end = std::move(first, pivot, meta_.begin_);
+            for (pointer it{end}; it != meta_.end_; ++it)
             {
-                auto end = std::move(first, last, meta_.begin_);
-                for (auto it = end; it != meta_.end_; ++it)
-                {
-                    allocator_traits::destroy(meta_, it);
-                }
-                meta_.end_ = end;
+                allocator_traits::destroy(meta_, it);
             }
-            else
-            {
-                auto end = std::move(first, first + current_size, meta_.begin_);
-                meta_.end_ = std::uninitialized_move(first + current_size, last, end);
-            }
+            meta_.end_ = std::uninitialized_move(pivot, last, end);
         }
 
         template <typename ...Args>
