@@ -129,16 +129,25 @@ namespace low
             const auto distance = static_cast<std::size_t>(std::distance(first, last));
             if (capacity() < distance)
             {
+                // if capacity is not enough - allocate it
                 release_storage();
                 reserve(distance);
             }
 
+            // move-assign elements until either:
+            // 1) all elements from [first, last) copied or
+            // 2) elements in *this are over
             const It pivot = first + std::min(size(), distance);
             const pointer end = std::move(first, pivot, meta_.begin_);
+
+            // destruct old remaining elements if there are any
             for (pointer it{end}; it != meta_.end_; ++it)
             {
                 allocator_traits::destroy(meta_, it);
             }
+
+            // move-construct the rest elements from initial [first, last)
+            // range if there are any
             meta_.end_ = std::uninitialized_move(pivot, last, end);
         }
 
