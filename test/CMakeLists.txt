@@ -1,6 +1,7 @@
 find_package(Catch2 REQUIRED HINTS /cmake)
 
 add_executable(unit_test
+    test_assign.cpp
     test_clear.cpp
     test_copy_constructor.cpp
     test_copy_constructor_tracker.cpp

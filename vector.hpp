@@ -122,6 +122,22 @@ namespace low
             return *this;
         }
 
+        template <typename It>
+        void assign(It first, It last)
+        {
+            auto distance = static_cast<std::size_t>(std::distance(first, last));
+            if (capacity() < distance)
+            {
+                release_storage();
+                reserve(distance);
+            }
+            else
+            {
+                clear();
+            }
+            meta_.end_ = std::uninitialized_move(first, last, meta_.begin_);
+        }
+
         template <typename ...Args>
         void emplace_back(Args&& ...args)
         {
