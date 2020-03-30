@@ -131,8 +131,6 @@ namespace low
             {
                 release_storage();
                 reserve(distance);
-                meta_.end_ = std::uninitialized_move(first, last, meta_.begin_);
-                return;
             }
 
             const It pivot = first + std::min(size(), distance);
