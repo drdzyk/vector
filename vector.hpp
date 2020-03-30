@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 
 namespace low
@@ -130,12 +131,24 @@ namespace low
             {
                 release_storage();
                 reserve(distance);
+                meta_.end_ = std::uninitialized_move(first, last, meta_.begin_);
+                return;
+            }
+            auto current_size = size();
+            if (current_size >= distance)
+            {
+                auto end = std::move(first, last, meta_.begin_);
+                for (auto it = end; it != meta_.end_; ++it)
+                {
+                    allocator_traits::destroy(meta_, it);
+                }
+                meta_.end_ = end;
             }
             else
             {
-                clear();
+                auto end = std::move(first, first + current_size, meta_.begin_);
+                meta_.end_ = std::uninitialized_move(first + current_size, last, end);
             }
-            meta_.end_ = std::uninitialized_move(first, last, meta_.begin_);
         }
 
         template <typename ...Args>
