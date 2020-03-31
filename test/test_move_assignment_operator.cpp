@@ -18,7 +18,6 @@ TEMPLATE_PRODUCT_TEST_CASE("move assignment operator", "[low::vector][std::vecto
         copy = std::move(source);
         REQUIRE(copy.empty());
     }
-
     SECTION("assign produce vector with same content")
     {
         source.emplace_back(7);
@@ -32,7 +31,6 @@ TEMPLATE_PRODUCT_TEST_CASE("move assignment operator", "[low::vector][std::vecto
         REQUIRE(copy[0] == 7);
         REQUIRE(copy[1] == 8);
     }
-
     SECTION("self assignment is ok") // but not for std::vector
     {
         source.emplace_back(7);
@@ -60,12 +58,24 @@ TEMPLATE_PRODUCT_TEST_CASE("move assignment operator different allocators", "[lo
     TestType source;
     TestType copy;
 
-    SECTION("assign from empty source produce empty vector")
+    SECTION("assign from empty to empty")
     {
         copy = std::move(source);
         REQUIRE(copy.empty());
     }
-
+    SECTION("assign from not empty to empty")
+    {
+        source.emplace_back(7);
+        copy = std::move(source);
+        REQUIRE(copy.size() == 1);
+        REQUIRE(copy[0] == 7);
+    }
+    SECTION("assign from empty to not empty")
+    {
+        copy.emplace_back(7);
+        copy = std::move(source);
+        REQUIRE(copy.empty());
+    }
     SECTION("assign produce vector with same content")
     {
         source.emplace_back(7);
