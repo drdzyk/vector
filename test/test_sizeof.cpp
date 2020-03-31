@@ -7,7 +7,7 @@ TEST_CASE("sizeof vector with stateless allocator", "[vector]")
 {
     // we employ EBO(empty base optimization) for stateless allocator
     using alloc = std::allocator<int>;
-    static_assert(sizeof(alloc) == 1, "std::allocator is stateless");
+    static_assert(std::is_empty_v<alloc>, "std::allocator is stateless");
     static_assert(alignof(low::vector<int, alloc>) == sizeof(void *), "vector aligned by pointer size");
     static_assert(sizeof(low::vector<int, alloc>) == 3 * sizeof(void *), "vector contains 3 pointer");
 }
