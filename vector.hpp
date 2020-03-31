@@ -102,11 +102,11 @@ namespace low
                 r.meta_.begin_ = nullptr;
                 r.meta_.end_ = nullptr;
                 r.meta_.capacity_ = nullptr;
-                return *this;
             }
-
-            assign(std::move_iterator{r.begin()}, std::move_iterator{r.end()});
-
+            else
+            {
+                assign(std::move_iterator{r.begin()}, std::move_iterator{r.end()});
+            }
             return *this;
         }
 
