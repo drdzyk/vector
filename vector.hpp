@@ -110,10 +110,12 @@ namespace low
             {
                 return *this;
             }
+            // in this case other alloc unable to deal with elements from *this, so deallocate it
             if (allocator_traits::propagate_on_container_copy_assignment::value && get_allocator() != r.get_allocator())
             {
                 release_storage();
             }
+            // compile time knowledge - propagate other allocator or not
             if constexpr (allocator_traits::propagate_on_container_copy_assignment::value)
             {
                 auto self_begin = meta_.begin_;
@@ -124,6 +126,7 @@ namespace low
                 meta_.end_ = self_end;
                 meta_.capacity_ = self_capacity;
             }
+            // and assign other elements using old or new allocator, depending on pocca
             assign(r.begin(), r.end());
             return *this;
         }
