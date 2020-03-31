@@ -7,6 +7,7 @@ add_compile_options(
     -Wall
     -Werror
     -Wextra
+    -Wconversion
     -fsanitize=address
 )
 
