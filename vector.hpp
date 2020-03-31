@@ -79,6 +79,7 @@ namespace low
             {
                 return *this;
             }
+            // compile time knowledge, that we need to steal resources from other and propagate allocator
             if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
             {
                 release_storage();
@@ -88,13 +89,16 @@ namespace low
                 r.meta_.capacity_ = nullptr;
                 return *this;
             }
+            // if propagation prohibited, perform runtime dispatch:
             if (get_allocator() == r.get_allocator())
             {
+                // if allocators equal, just steal resources
                 release_storage();
                 meta_.steal_pointers(std::move(r.meta_));
             }
             else
             {
+                // otherwise, perform element-wise move
                 assign(std::move_iterator{r.begin()}, std::move_iterator{r.end()});
             }
             return *this;
