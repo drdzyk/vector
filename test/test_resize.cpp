@@ -106,7 +106,6 @@ TEMPLATE_PRODUCT_TEST_CASE("resize scale", "[low::vector][std::vector]",
                            (low::vector, std::vector), (int, double, DynamicInt))
 {
     TestType v;
-    using value_type =  typename TestType::value_type;
 
     v.resize(8);
     REQUIRE(v.size() == 8);

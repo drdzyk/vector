@@ -76,20 +76,20 @@ struct tracked_allocator
     {
         ++global_tracker.ctor;
     }
-    tracked_allocator(const tracked_allocator &other) noexcept
+    tracked_allocator(const tracked_allocator &) noexcept
     {
         ++global_tracker.copy_ctor;
     }
-    tracked_allocator(tracked_allocator &&other) noexcept
+    tracked_allocator(tracked_allocator &&) noexcept
     {
         ++global_tracker.move_ctor;
     }
-    tracked_allocator& operator=(const tracked_allocator &other) noexcept
+    tracked_allocator& operator=(const tracked_allocator &) noexcept
     {
         ++global_tracker.copy_assign;
         return *this;
     }
-    tracked_allocator& operator=(tracked_allocator &&other) noexcept
+    tracked_allocator& operator=(tracked_allocator &&) noexcept
     {
         ++global_tracker.move_assign;
         return *this;

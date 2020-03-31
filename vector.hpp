@@ -115,6 +115,7 @@ namespace low
                 meta_ = r.meta_;
             }
             assign(r.begin(), r.end());
+            return *this;
         }
 
         template <typename It>

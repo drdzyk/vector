@@ -4,6 +4,9 @@ project(vector LANGUAGES CXX)
 add_compile_options(
     -std=c++17
     -g3
+    -Wall
+    -Werror
+    -Wextra
     -fsanitize=address
 )
 

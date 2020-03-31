@@ -54,12 +54,12 @@ public:
     {
         ++tracker_->move_ctor;
     }
-    TrackedType& operator=(const TrackedType &other) noexcept((std::is_same_v<NoexceptCopyAssignTag, Tags> || ...))
+    TrackedType& operator=(const TrackedType &) noexcept((std::is_same_v<NoexceptCopyAssignTag, Tags> || ...))
     {
         ++tracker_->copy_assign;
         return *this;
     }
-    TrackedType& operator=(TrackedType &&other) noexcept((std::is_same_v<NoexceptMoveAssignTag, Tags> || ...))
+    TrackedType& operator=(TrackedType &&) noexcept((std::is_same_v<NoexceptMoveAssignTag, Tags> || ...))
     {
         ++tracker_->move_assign;
         return *this;
