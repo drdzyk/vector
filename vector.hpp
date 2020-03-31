@@ -104,6 +104,19 @@ namespace low
             return *this;
         }
 
+        vector &operator=(const vector &r)
+        {
+            if (allocator_traits::propagate_on_container_copy_assignment::value && get_allocator() != r.get_allocator())
+            {
+                release_storage();
+            }
+            if constexpr (allocator_traits::propagate_on_container_copy_assignment::value)
+            {
+                meta_ = r.meta_;
+            }
+            assign(r.begin(), r.end());
+        }
+
         template <typename It>
         void assign(It first, It last)
         {
