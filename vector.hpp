@@ -104,21 +104,8 @@ namespace low
                 r.meta_.capacity_ = nullptr;
                 return *this;
             }
-            if (size() >= r.size())
-            {
-                auto end = std::move(r.meta_.begin_, r.meta_.end_, meta_.begin_);
-                for (auto cur = end; cur != meta_.end_; ++cur)
-                {
-                    allocator_traits::destroy(meta_, cur);
-                }
-                meta_.end_ = end;
-            }
-            else
-            {
-                release_storage();
-                reserve(r.size());
-                meta_.end_ = std::uninitialized_move(r.meta_.begin_, r.meta_.end_, meta_.begin_);
-            }
+
+            assign(std::move_iterator{r.begin()}, std::move_iterator{r.end()});
 
             return *this;
         }
