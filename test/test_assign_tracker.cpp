@@ -7,6 +7,88 @@
 #include "vector.hpp"
 #include "TrackedType.hpp"
 
+TEMPLATE_PRODUCT_TEST_CASE("assign tracker", "[low::vector][std::vector]",
+                           (low::vector, std::vector), TrackedType<>)
+{
+    const auto tracker = std::make_shared<TypeTracker>();
+    std::array<TrackedType<>, 2> source{tracker, tracker};
+    REQUIRE(*tracker == (TypeTracker{.ctor = 2}));
+
+    SECTION("move to empty vector")
+    {
+        TestType v;
+        v.assign(source.begin(), source.end());
+        REQUIRE(*tracker == (TypeTracker{.ctor = 2, .copy_ctor = 2}));
+    }
+    SECTION("move to not empty vector with not enough capacity")
+    {
+        TestType v;
+        v.emplace_back(tracker);
+        REQUIRE(*tracker == (TypeTracker{.ctor = 3}));
+
+        v.assign(source.begin(), source.end());
+        REQUIRE(*tracker == (TypeTracker{.ctor = 3, .copy_ctor = 2, .dtor = 1}));
+    }
+    SECTION("move to not empty vector with enough capacity")
+    {
+        TestType v;
+        v.reserve(2);
+        v.emplace_back(tracker);
+        REQUIRE(*tracker == (TypeTracker{.ctor = 3}));
+
+        v.assign(source.begin(), source.end());
+        REQUIRE(*tracker == (TypeTracker{.ctor = 3, .copy_ctor = 1, .copy_assign = 1}));
+    }
+    SECTION("move to not empty vector with enough capacity")
+    {
+        TestType v;
+        v.reserve(2);
+        v.emplace_back(tracker);
+        v.emplace_back(tracker);
+        REQUIRE(*tracker == (TypeTracker{.ctor = 4}));
+
+        v.assign(source.begin(), source.end());
+        REQUIRE(*tracker == (TypeTracker{.ctor = 4, .copy_assign = 2}));
+    }
+    SECTION("move to not empty vector with enough capacity")
+    {
+        TestType v;
+        v.reserve(3);
+        v.emplace_back(tracker);
+        v.emplace_back(tracker);
+        REQUIRE(*tracker == (TypeTracker{.ctor = 4}));
+
+        v.assign(source.begin(), source.end());
+        REQUIRE(*tracker == (TypeTracker{.ctor = 4, .copy_assign = 2}));
+    }
+    SECTION("move to not empty vector with enough capacity")
+    {
+        TestType v;
+        v.reserve(3);
+        v.emplace_back(tracker);
+        v.emplace_back(tracker);
+        v.emplace_back(tracker);
+        REQUIRE(*tracker == (TypeTracker{.ctor = 5}));
+
+        v.assign(source.begin(), source.end());
+        REQUIRE(*tracker == (TypeTracker{.ctor = 5, .copy_assign = 2, .dtor = 1}));
+    }
+    SECTION("move to not empty vector with enough capacity")
+    {
+        TestType v;
+        v.reserve(5);
+        v.emplace_back(tracker);
+        v.emplace_back(tracker);
+        v.emplace_back(tracker);
+        v.emplace_back(tracker);
+        v.emplace_back(tracker);
+        REQUIRE(*tracker == (TypeTracker{.ctor = 7}));
+
+        v.assign(source.begin(), source.end());
+        REQUIRE(*tracker == (TypeTracker{.ctor = 7, .copy_assign = 2, .dtor = 3}));
+    }
+}
+
 TEMPLATE_PRODUCT_TEST_CASE("assign tracker with move iterators", "[low::vector][std::vector]",
                            (low::vector, std::vector), TrackedType<>)
 {
