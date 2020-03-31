@@ -11,6 +11,7 @@ namespace alloc
     template <typename T, Equal equal, Pocma pocma, Pocca pocca>
     struct Allocator
     {
+        int i; // not work without this, WTF!?
         using value_type = T;
 
         using propagate_on_container_move_assignment = std::integral_constant<bool, pocma == Pocma::Yes>;
