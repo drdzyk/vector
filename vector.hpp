@@ -106,13 +106,23 @@ namespace low
 
         vector &operator=(const vector &r)
         {
+            if (this == &r) // be on a safe side
+            {
+                return *this;
+            }
             if (allocator_traits::propagate_on_container_copy_assignment::value && get_allocator() != r.get_allocator())
             {
                 release_storage();
             }
             if constexpr (allocator_traits::propagate_on_container_copy_assignment::value)
             {
+                auto self_begin = meta_.begin_;
+                auto self_end = meta_.end_;
+                auto self_capacity = meta_.capacity_;
                 meta_ = r.meta_;
+                meta_.begin_ = self_begin;
+                meta_.end_ = self_end;
+                meta_.capacity_ = self_capacity;
             }
             assign(r.begin(), r.end());
             return *this;
