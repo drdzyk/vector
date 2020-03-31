@@ -11,9 +11,11 @@ namespace alloc
     template <typename T, Equal equal, Pocma pocma, Pocca pocca>
     struct Allocator
     {
-        int i; // not work without this, WTF!?
         using value_type = T;
 
+        // make sure that 'is_always_equal' should be same as operator== return value;
+        // otherwise it has no sense
+        using is_always_equal = std::integral_constant<bool, equal == Equal::Yes>;
         using propagate_on_container_move_assignment = std::integral_constant<bool, pocma == Pocma::Yes>;
         using propagate_on_container_copy_assignment = std::integral_constant<bool, pocca == Pocca::Yes>;
 
