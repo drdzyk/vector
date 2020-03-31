@@ -52,12 +52,7 @@ namespace low
             else
             {
                 // just steal a pointers
-                meta_.begin_ = r.meta_.begin_;
-                meta_.end_ = r.meta_.end_;
-                meta_.capacity_ = r.meta_.capacity_;
-                r.meta_.begin_ = nullptr;
-                r.meta_.end_ = nullptr;
-                r.meta_.capacity_ = nullptr;
+                meta_.steal_pointers(std::move(r.meta_));
             }
         }
 
@@ -96,12 +91,7 @@ namespace low
             if (get_allocator() == r.get_allocator())
             {
                 release_storage();
-                meta_.begin_ = r.meta_.begin_;
-                meta_.end_ = r.meta_.end_;
-                meta_.capacity_ = r.meta_.capacity_;
-                r.meta_.begin_ = nullptr;
-                r.meta_.end_ = nullptr;
-                r.meta_.capacity_ = nullptr;
+                meta_.steal_pointers(std::move(r.meta_));
             }
             else
             {
@@ -288,6 +278,16 @@ namespace low
         {
             meta() = default;
             explicit meta(const allocator_type &alloc) noexcept : allocator_type(alloc) {}
+
+            void steal_pointers(meta &&other) noexcept
+            {
+                begin_ = other.begin_;
+                end_ = other.end_;
+                capacity_ = other.capacity_;
+                other.begin_ = nullptr;
+                other.end_ = nullptr;
+                other.capacity_ = nullptr;
+            }
 
             pointer begin_{nullptr};
             pointer end_{nullptr};
