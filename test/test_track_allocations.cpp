@@ -117,6 +117,20 @@ struct tracked_allocator_pocma : tracked_allocator<T, true>
     using propagate_on_container_move_assignment = std::integral_constant<bool, pocma>;
 };
 
+template <typename T, bool isEqual,  bool pocca>
+struct tracked_allocator_pocca : tracked_allocator<T, true>
+{
+    using value_type = T;
+
+    template<typename U>
+    struct rebind
+    {
+        using other = tracked_allocator_pocma<U, isEqual, pocca>;
+    };
+
+    using propagate_on_container_copy_assignment = std::integral_constant<bool, pocca>;
+};
+
 struct Fixture
 {
     ~Fixture() noexcept
@@ -221,6 +235,33 @@ TEST_CASE_METHOD(Fixture, "move assign operator; pocma false; allocators not equ
 
     copy = std::move(source);
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+}
+
+TEST_CASE_METHOD(Fixture, "copy assign operator; pocca false")
+{
+    low::vector<int, tracked_allocator_pocca<int, true, false>> source, copy;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+
+    copy = source;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+}
+
+TEST_CASE_METHOD(Fixture, "copy assign operator; pocca true; allocators equal")
+{
+    low::vector<int, tracked_allocator_pocca<int, true, true>> source, copy;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+
+    copy = source;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .copy_assign = 1}));
+}
+
+TEST_CASE_METHOD(Fixture, "copy assign operator; pocca true; allocators not equal")
+{
+    low::vector<int, tracked_allocator_pocca<int, false, true>> source, copy;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+
+    copy = source;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .copy_assign = 1}));
 }
 
 TEST_CASE_METHOD(Fixture, "track allocations")
