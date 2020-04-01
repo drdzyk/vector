@@ -37,20 +37,27 @@ namespace low
             r.meta_.capacity_ = nullptr;
         }
 
-        vector(vector &&r, const allocator_type &alloc) :
-            meta_(alloc)
+        vector(vector &&r, const allocator_type &alloc)
+            noexcept(allocator_traits::is_always_equal::value) : meta_(alloc)
         {
-            if (r.get_allocator() != alloc) // exactly this comparison required by standard,
-                // see https://en.cppreference.com/w/cpp/container/vector/vector
+            // compile time knowledge, that allocators always equal
+            if constexpr (allocator_traits::is_always_equal::value)
+            {
+                // if so, just steal a pointers
+                meta_.steal_pointers(std::move(r.meta_));
+                return;
+            }
+            // otherwise perform runtime dispatch
+            if (r.get_allocator() == alloc)
+            {
+                // just steal a pointers
+                meta_.steal_pointers(std::move(r.meta_));
+            }
+            else
             {
                 // perform element-wise move of stored objects
                 reserve(r.size());
                 meta_.end_ = std::uninitialized_move(r.meta_.begin_, r.meta_.end_, meta_.begin_);
-            }
-            else
-            {
-                // just steal a pointers
-                meta_.steal_pointers(std::move(r.meta_));
             }
         }
 
