@@ -18,14 +18,12 @@ namespace low
         using const_pointer = const T*;
         using reference = T&;
         using const_reference = const T&;
-
+        using iterator = pointer;
+        using const_iterator = const_pointer;
         // employ user-provided allocator, since we ensured that it value_type is same as for vector,
         // thus no need to rebound allocator
         using allocator_type = Alloc;
         using allocator_traits = std::allocator_traits<Alloc>;
-
-        using iterator = __gnu_cxx::__normal_iterator<pointer, vector>;
-        using const_iterator = __gnu_cxx::__normal_iterator<const_pointer, vector>;
 
         vector() = default;
 
@@ -192,14 +190,14 @@ namespace low
         std::size_t capacity() const noexcept { return meta_.capacity_ - meta_.begin_; }
         bool empty() const noexcept { return size() == 0u; }
 
-        iterator begin() noexcept { return iterator{meta_.begin_}; }
-        iterator end() noexcept { return iterator{meta_.end_}; }
+        iterator begin() noexcept { return meta_.begin_; }
+        iterator end() noexcept { return meta_.end_; }
 
-        const_iterator begin() const noexcept { return const_iterator{meta_.begin_}; }
-        const_iterator end() const noexcept { return const_iterator{meta_.end_}; }
+        const_iterator begin() const noexcept { return meta_.begin_; }
+        const_iterator end() const noexcept { return meta_.end_; }
 
-        const_iterator cbegin() const noexcept { return const_iterator{meta_.begin_}; }
-        const_iterator cend() const noexcept { return const_iterator{meta_.end_}; }
+        const_iterator cbegin() const noexcept { return meta_.begin_; }
+        const_iterator cend() const noexcept { return meta_.end_; }
 
         // meet AllocatorAwareContainer requirements;
         const allocator_type &get_allocator() const noexcept { return meta_; }
@@ -208,7 +206,7 @@ namespace low
         {
             for (auto it = begin(); it != end(); ++it)
             {
-                allocator_traits::destroy(meta_, it.base());
+                allocator_traits::destroy(meta_, it);
             }
             meta_.end_ = meta_.begin_;
         }
