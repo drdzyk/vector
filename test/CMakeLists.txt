@@ -15,6 +15,7 @@ add_executable(unit_test
     test_move_constructor.cpp
     test_move_constructor_tracker.cpp
     test_move_if_noexcept.cpp
+    test_noexcept_specifier.cpp
     test_reserve.cpp
     test_resize.cpp
     test_shrink_to_fit.cpp
