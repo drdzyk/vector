@@ -47,8 +47,8 @@ namespace alloc
         T *allocate(std::size_t n) { return std::allocator<T>{}.allocate(n); }
         void deallocate(T *p, std::size_t s) { std::allocator<T>{}.deallocate(p, s); }
 
-        friend bool operator==(const Allocator&, const Allocator&) noexcept { return Traits::equal; }
-        friend bool operator!=(const Allocator&l, const Allocator&r) noexcept { return !(l == r); }
+        constexpr friend bool operator==(const Allocator&, const Allocator&) noexcept { return Traits::equal; }
+        constexpr friend bool operator!=(const Allocator&l, const Allocator&r) noexcept { return !(l == r); }
     };
 
     namespace traits_
