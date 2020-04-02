@@ -25,7 +25,7 @@ TEMPLATE_PRODUCT_TEST_CASE("move constructor tracker", "[low::vector][std::vecto
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor tracker, equal allocator", "",
-                           (low::vector, std::vector), ((TrackedType<>, alloc::Eq<TrackedType<>>)))
+                           (low::vector, std::vector), ((TrackedType<>, alloc::DynamicEq<TrackedType<>>)))
 {
     const auto tracker = std::make_shared<TypeTracker>();
     TestType source;
@@ -43,7 +43,7 @@ TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor tracker, equal a
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor tracker, not equal allocator", "",
-                           (low::vector, std::vector), ((TrackedType<>, alloc::NotEq<TrackedType<>>)))
+                           (low::vector, std::vector), ((TrackedType<>, alloc::DynamicNotEq<TrackedType<>>)))
 {
     const auto tracker = std::make_shared<TypeTracker>();
     TestType source;

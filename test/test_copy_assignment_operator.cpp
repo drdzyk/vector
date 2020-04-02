@@ -48,10 +48,10 @@ TEMPLATE_PRODUCT_TEST_CASE("copy assignment operator", "[low::vector][std::vecto
 
 TEMPLATE_PRODUCT_TEST_CASE("copy assignment operator different allocators", "[low::vector][std::vector]",
     (low::vector, std::vector), (
-        (DynamicInt, alloc::Eq<DynamicInt>),
-        (DynamicInt, alloc::EqPocca<DynamicInt>),
-        (DynamicInt, alloc::NotEq<DynamicInt>),
-        (DynamicInt, alloc::NotEqPocca<DynamicInt>)
+        (DynamicInt, alloc::DynamicEq<DynamicInt>),
+        (DynamicInt, alloc::DynamicEqPocca<DynamicInt>),
+        (DynamicInt, alloc::DynamicNotEq<DynamicInt>),
+        (DynamicInt, alloc::DynamicNotEqPocca<DynamicInt>)
     )
 )
 {

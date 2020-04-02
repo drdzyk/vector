@@ -6,7 +6,7 @@
 
 TEST_CASE("trivial constructors noexcept specifiers", "[vector]")
 {
-    using alloc = alloc::NotEq<int>;
+    using alloc = alloc::DynamicNotEq<int>;
     using vec = low::vector<int, alloc>;
 
     static_assert(noexcept(vec{}));
@@ -22,14 +22,14 @@ TEST_CASE("trivial constructors noexcept specifiers", "[vector]")
 
 TEST_CASE("allocator-extended move constructor noexcept with always equals allocators", "[vector]")
 {
-    using alloc = alloc::Eq<int>;
+    using alloc = alloc::StaticEq<int>;
     using vec = low::vector<int, alloc>;
     static_assert(noexcept(vec{vec{}, alloc{}}));
 }
 
 TEST_CASE("allocator-extended move constructor may throws with not always equals allocators", "[vector]")
 {
-    using alloc = alloc::NotEq<int>;
+    using alloc = alloc::DynamicEq<int>;
     using vec = low::vector<int, alloc>;
     static_assert(!noexcept(vec{vec{}, alloc{}}));
 }

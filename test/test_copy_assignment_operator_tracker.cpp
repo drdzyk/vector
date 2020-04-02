@@ -9,9 +9,9 @@
 
 TEMPLATE_PRODUCT_TEST_CASE("copy assignment operator tracker", "[low::vector][std::vector]",
     (low::vector, std::vector), (
-        (TrackedType<>, alloc::Eq<TrackedType<>>),
-        (TrackedType<>, alloc::NotEq<TrackedType<>>),
-        (TrackedType<>, alloc::EqPocca<TrackedType<>>)
+        (TrackedType<>, alloc::DynamicEq<TrackedType<>>),
+        (TrackedType<>, alloc::DynamicNotEq<TrackedType<>>),
+        (TrackedType<>, alloc::DynamicEqPocca<TrackedType<>>)
     )
 )
 {
@@ -44,7 +44,7 @@ TEMPLATE_PRODUCT_TEST_CASE("copy assignment operator tracker", "[low::vector][st
 
 TEMPLATE_PRODUCT_TEST_CASE("copy assignment operator tracker; pocca true, allocators unequal", "[low::vector][std::vector]",
     (low::vector, std::vector), (
-        (TrackedType<>, alloc::NotEqPocca<TrackedType<>>)
+        (TrackedType<>, alloc::DynamicNotEqPocca<TrackedType<>>)
     )
 )
 {
