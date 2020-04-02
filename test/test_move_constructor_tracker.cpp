@@ -27,8 +27,27 @@ TEMPLATE_PRODUCT_TEST_CASE("move constructor tracker", "[low::vector][std::vecto
 TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor tracker, equal allocator", "",
     (low::vector, std::vector), (
         (TrackedType<>, alloc::StaticEq<TrackedType<>>),
-        (TrackedType<>, alloc::DynamicEq<TrackedType<>>))
+        (TrackedType<>, alloc::DynamicEq<TrackedType<>>)
     )
+)
+{
+    const auto tracker = std::make_shared<TypeTracker>();
+    TestType source;
+    source.reserve(2);
+    source.emplace_back(tracker);
+    source.emplace_back(tracker);
+    REQUIRE(*tracker == (TypeTracker{.ctor = 2}));
+
+    SECTION("move constructor which accept equal allocator steal pointers too")
+    {
+        typename TestType::allocator_type other;
+        TestType copy{std::move(source), other};
+        REQUIRE(*tracker == (TypeTracker{.ctor = 2}));
+    }
+}
+
+TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor tracker with wrong allocator", "",
+    (low::vector), ((TrackedType<>, alloc::WrongEq<TrackedType<>>))) // std::vector son't use is_always_equal here
 {
     const auto tracker = std::make_shared<TypeTracker>();
     TestType source;

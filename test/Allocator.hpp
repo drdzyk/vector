@@ -55,18 +55,25 @@ namespace alloc
     {
         struct StaticEq
         {
-            constexpr static bool equal = true;
             using is_always_equal = std::true_type;
+            constexpr static bool equal = true;
+        };
+        struct WrongEq
+        {
+            // Achtung! allocator is always equal, but operator== returns false!
+            // Need for testing purposes
+            using is_always_equal = std::true_type;
+            constexpr static bool equal = false;
         };
         struct DynamicEq
         {
-            constexpr static bool equal = true;
             using is_always_equal = std::false_type;
+            constexpr static bool equal = true;
         };
         struct DynamicNotEq
         {
-            constexpr static bool equal = false;
             using is_always_equal = std::false_type;
+            constexpr static bool equal = false;
         };
         struct StaticEqPocma     : StaticEq     { using pocma = std::true_type; };
         struct DynamicEqPocma    : DynamicEq    { using pocma = std::true_type; };
@@ -82,6 +89,8 @@ namespace alloc
     using DynamicEq = Allocator<T, traits_::DynamicEq>;
     template <typename T>
     using DynamicNotEq = Allocator<T, traits_::DynamicNotEq>;
+    template <typename T>
+    using WrongEq = Allocator<T, traits_::WrongEq>;
 
     template <typename T>
     using StaticEqPocma = Allocator<T, traits_::StaticEqPocma>;

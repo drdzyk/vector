@@ -32,6 +32,7 @@ TEMPLATE_PRODUCT_TEST_CASE("move constructor", "[low::vector][std::vector]",
 
 TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor", "[low::vector][std::vector]",
     (low::vector, std::vector), (
+        (int, alloc::WrongEq<int>),
         (int, alloc::StaticEq<int>),
         (double, alloc::StaticEq<double>),
         (DynamicInt, alloc::StaticEq<DynamicInt>),

@@ -55,4 +55,10 @@ namespace alloc
     static_assert(I_::propagate_on_container_copy_assignment::value);
     static_assert(!I_::propagate_on_container_move_assignment::value);
     static_assert(I_{} != I_{});
+
+    using J_ = WrongEq<int>;
+    static_assert(J_::is_always_equal::value);
+    static_assert(!J_::propagate_on_container_copy_assignment::value);
+    static_assert(!J_::propagate_on_container_move_assignment::value);
+    static_assert(J_{} != J_{});
 }
