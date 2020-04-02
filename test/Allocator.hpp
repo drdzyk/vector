@@ -4,46 +4,114 @@
 
 namespace alloc
 {
-    enum class Equal{Yes, No};
-    enum class Pocma{Yes, No};
-    enum class Pocca{Yes, No};
-
-    template <typename T, Equal equal, Pocma pocma, Pocca pocca>
+    template <typename T, typename Traits>
     struct Allocator
     {
         using value_type = T;
 
-        // make sure that 'is_always_equal' should be same as operator== return value;
-        // otherwise it has no sense
-        using is_always_equal = std::integral_constant<bool, equal == Equal::Yes>;
-        using propagate_on_container_move_assignment = std::integral_constant<bool, pocma == Pocma::Yes>;
-        using propagate_on_container_copy_assignment = std::integral_constant<bool, pocca == Pocca::Yes>;
+        // make sure that if is_always_equal=true, then operator== should returns true too
+        using is_always_equal = typename Traits::is_always_equal;
+        using propagate_on_container_move_assignment = typename Traits::pocma;
+        using propagate_on_container_copy_assignment = typename Traits::pocca;
 
         template<typename U>
         struct rebind
         {
-            using other = Allocator<U, equal, pocma, pocca>;
+            using other = Allocator<U, Traits>;
         };
 
         T *allocate(std::size_t n) { return std::allocator<T>{}.allocate(n); }
         void deallocate(T *p, std::size_t s) { std::allocator<T>{}.deallocate(p, s); }
 
-        friend bool operator==(const Allocator&, const Allocator&) noexcept { return equal == Equal::Yes; }
+        friend bool operator==(const Allocator&, const Allocator&) noexcept { return Traits::equal; }
         friend bool operator!=(const Allocator&l, const Allocator&r) noexcept { return !(l == r); }
     };
 
-    template <typename T>
-    using Eq = Allocator<T, Equal::Yes, Pocma::No, Pocca::No>;
-    template <typename T>
-    using NotEq = Allocator<T, Equal::No, Pocma::No, Pocca::No>;
+    namespace traits_
+    {
+        struct StaticEq
+        {
+            constexpr static bool equal = true;
+            using is_always_equal = std::true_type;
+            using pocma = std::false_type;
+            using pocca = std::false_type;
+        };
+        struct DynamicEq
+        {
+            constexpr static bool equal = true;
+            using is_always_equal = std::false_type;
+            using pocma = std::false_type;
+            using pocca = std::false_type;
+        };
+        struct DynamicNotEq
+        {
+            constexpr static bool equal = false;
+            using is_always_equal = std::false_type;
+            using pocma = std::false_type;
+            using pocca = std::false_type;
+        };
+        struct StaticEqPocma
+        {
+            constexpr static bool equal = true;
+            using is_always_equal = std::true_type;
+            using pocma = std::true_type;
+            using pocca = std::false_type;
+        };
+        struct DynamicEqPocma
+        {
+            constexpr static bool equal = true;
+            using is_always_equal = std::false_type;
+            using pocma = std::true_type;
+            using pocca = std::false_type;
+        };
+        struct DynamicNotEqPocma
+        {
+            constexpr static bool equal = false;
+            using is_always_equal = std::false_type;
+            using pocma = std::true_type;
+            using pocca = std::false_type;
+        };
+        struct StaticEqPocca
+        {
+            constexpr static bool equal = true;
+            using is_always_equal = std::true_type;
+            using pocma = std::false_type;
+            using pocca = std::true_type;
+        };
+        struct DynamicEqPocca
+        {
+            constexpr static bool equal = true;
+            using is_always_equal = std::false_type;
+            using pocma = std::false_type;
+            using pocca = std::true_type;
+        };
+        struct DynamicNotEqPocca
+        {
+            constexpr static bool equal = false;
+            using is_always_equal = std::false_type;
+            using pocma = std::false_type;
+            using pocca = std::true_type;
+        };
+    }
 
     template <typename T>
-    using EqPocma = Allocator<T, Equal::Yes, Pocma::Yes, Pocca::No>;
+    using StaticEq = Allocator<T, traits_::StaticEq>;
     template <typename T>
-    using NotEqPocma = Allocator<T, Equal::No, Pocma::Yes, Pocca::No>;
+    using DynamicEq = Allocator<T, traits_::DynamicEq>;
+    template <typename T>
+    using DynamicNotEq = Allocator<T, traits_::DynamicNotEq>;
 
     template <typename T>
-    using EqPocca = Allocator<T, Equal::Yes, Pocma::No, Pocca::Yes>;
+    using StaticEqPocma = Allocator<T, traits_::StaticEqPocma>;
     template <typename T>
-    using NotEqPocca = Allocator<T, Equal::No, Pocma::No, Pocca::Yes>;
+    using DynamicEqPocma = Allocator<T, traits_::DynamicEqPocma>;
+    template <typename T>
+    using DynamicNotEqPocma = Allocator<T, traits_::DynamicNotEqPocma>;
+
+    template <typename T>
+    using StaticEqPocca = Allocator<T, traits_::StaticEqPocca>;
+    template <typename T>
+    using DynamicEqPocca = Allocator<T, traits_::DynamicEqPocca>;
+    template <typename T>
+    using DynamicNotEqPocca = Allocator<T, traits_::DynamicNotEqPocca>;
 }
