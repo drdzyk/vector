@@ -3,7 +3,7 @@ set(CMAKE_CXX_COMPILER clang++-9)
 project(vector LANGUAGES CXX)
 
 add_compile_options(
-    -std=c++17
+    -std=c++2a
     -g3
     -Wall
     -Werror
