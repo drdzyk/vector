@@ -30,9 +30,10 @@ namespace low
         explicit vector(const allocator_type &alloc) noexcept : alloc_(alloc) {}
 
         vector(vector &&r) noexcept :
-            alloc_(std::move(r.alloc_)),
-            meta_(std::move(r.meta_))
-        {}
+            alloc_(std::move(r.alloc_))
+        {
+            steal_pointers(std::move(r));
+        }
 
         vector(vector &&r, const allocator_type &alloc)
             noexcept(allocator_traits::is_always_equal::value) : alloc_(alloc)
@@ -41,20 +42,20 @@ namespace low
             if constexpr (allocator_traits::is_always_equal::value)
             {
                 // if so, just steal a pointers
-                meta_ = std::move(r.meta_);
+                steal_pointers(std::move(r));
                 return;
             }
             // otherwise perform runtime dispatch
             if (r.get_allocator() == alloc)
             {
                 // just steal a pointers
-                meta_ = std::move(r.meta_);
+                steal_pointers(std::move(r));
             }
             else
             {
                 // perform element-wise move of stored objects
                 reserve(r.size());
-                meta_.end_ = std::uninitialized_move(r.meta_.begin_, r.meta_.end_, meta_.begin_);
+                end_ = std::uninitialized_move(r.begin_, r.end_, begin_);
             }
         }
 
@@ -66,13 +67,13 @@ namespace low
             alloc_(alloc)
         {
             reserve(r.size());
-            meta_.end_ = std::uninitialized_copy(r.meta_.begin_, r.meta_.end_, meta_.begin_);
+            end_ = std::uninitialized_copy(r.begin_, r.end_, begin_);
         }
 
         vector(const std::initializer_list<value_type> &list)
         {
             reserve(list.size());
-            meta_.end_ = std::uninitialized_copy(list.begin(), list.end(), meta_.begin_);
+            end_ = std::uninitialized_copy(list.begin(), list.end(), begin_);
         }
 
         vector &operator=(vector &&r) noexcept
@@ -86,7 +87,7 @@ namespace low
             {
                 release_storage();
                 alloc_ = std::move(r.alloc_);
-                meta_ = std::move(r.meta_);
+                steal_pointers(std::move(r));
                 return *this;
             }
             // if propagation prohibited, perform runtime dispatch:
@@ -94,7 +95,7 @@ namespace low
             {
                 // if allocators equal, just steal resources
                 release_storage();
-                meta_ = std::move(r.meta_);
+                steal_pointers(std::move(r));
             }
             else
             {
@@ -140,25 +141,25 @@ namespace low
             // 1) all elements from [first, last) copied or
             // 2) elements in *this are over
             const It pivot = first + static_cast<std::ptrdiff_t>(std::min(size(), distance));
-            const pointer end = std::copy(first, pivot, meta_.begin_);
+            const pointer end = std::copy(first, pivot, begin_);
 
             // destruct old remaining elements if there are any
-            for (pointer it{end}; it != meta_.end_; ++it)
+            for (pointer it{end}; it != end_; ++it)
             {
                 allocator_traits::destroy(alloc_, it);
             }
 
             // copy-construct the rest elements from initial [first, last)
             // range if there are any
-            meta_.end_ = std::uninitialized_copy(pivot, last, end);
+            end_ = std::uninitialized_copy(pivot, last, end);
         }
 
         template <typename ...Args>
         void emplace_back(Args&& ...args)
         {
             reallocate_storage_if_needed();
-            allocator_traits::construct(alloc_, meta_.end_, std::forward<Args>(args)...);
-            meta_.end_ += 1u;
+            allocator_traits::construct(alloc_, end_, std::forward<Args>(args)...);
+            end_ += 1u;
         }
 
         void reserve(std::size_t new_capacity)
@@ -174,26 +175,26 @@ namespace low
 
         reference operator[](std::size_t idx)
         {
-            return *(meta_.begin_ + idx);
+            return *(begin_ + idx);
         }
 
         const_reference operator[](std::size_t idx) const
         {
-            return *(meta_.begin_ + idx);
+            return *(begin_ + idx);
         }
 
-        std::size_t size() const noexcept { return static_cast<std::size_t>(meta_.end_ - meta_.begin_); }
-        std::size_t capacity() const noexcept { return static_cast<std::size_t>(meta_.capacity_ - meta_.begin_); }
+        std::size_t size() const noexcept { return static_cast<std::size_t>(end_ - begin_); }
+        std::size_t capacity() const noexcept { return static_cast<std::size_t>(capacity_ - begin_); }
         bool empty() const noexcept { return size() == 0u; }
 
-        iterator begin() noexcept { return meta_.begin_; }
-        iterator end() noexcept { return meta_.end_; }
+        iterator begin() noexcept { return begin_; }
+        iterator end() noexcept { return end_; }
 
-        const_iterator begin() const noexcept { return meta_.begin_; }
-        const_iterator end() const noexcept { return meta_.end_; }
+        const_iterator begin() const noexcept { return begin_; }
+        const_iterator end() const noexcept { return end_; }
 
-        const_iterator cbegin() const noexcept { return meta_.begin_; }
-        const_iterator cend() const noexcept { return meta_.end_; }
+        const_iterator cbegin() const noexcept { return begin_; }
+        const_iterator cend() const noexcept { return end_; }
 
         const allocator_type &get_allocator() const noexcept { return alloc_; }
 
@@ -203,7 +204,7 @@ namespace low
             {
                 allocator_traits::destroy(alloc_, it);
             }
-            meta_.end_ = meta_.begin_;
+            end_ = begin_;
         }
 
         void shrink_to_fit() noexcept
@@ -233,8 +234,8 @@ namespace low
             {
                 for (std::ptrdiff_t count{diff}; count < 0; ++count)
                 {
-                    meta_.end_ -= 1u;
-                    allocator_traits::destroy(alloc_, meta_.end_);
+                    end_ -= 1u;
+                    allocator_traits::destroy(alloc_, end_);
                 }
             }
             else if (diff > 0)
@@ -249,8 +250,8 @@ namespace low
                 }
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {
-                    allocator_traits::construct(alloc_, meta_.end_, value...);
-                    meta_.end_ += 1u;
+                    allocator_traits::construct(alloc_, end_, value...);
+                    end_ += 1u;
                 }
             }
         }
@@ -258,12 +259,14 @@ namespace low
         void release_storage() noexcept
         {
             clear();
-            if (meta_.begin_) // don't deallocate nullptr
+            if (begin_) // don't deallocate nullptr
             {
                 // std::allocator requires that pointer should be previously allocated by 'allocate',
                 // despite the fact that operator delete is ok with nullptr
-                allocator_traits::deallocate(alloc_, meta_.begin_, capacity());
-                meta_.clear();
+                allocator_traits::deallocate(alloc_, begin_, capacity());
+                begin_ = nullptr;
+                end_ = nullptr;
+                capacity_ = nullptr;
             }
         }
 
@@ -274,16 +277,16 @@ namespace low
 
             // move old data in new storage
             if constexpr (std::is_nothrow_move_constructible_v<value_type>)
-                std::uninitialized_move(meta_.begin_, meta_.begin_ + new_size, new_memory);
+                std::uninitialized_move(begin_, begin_ + new_size, new_memory);
             else
-                std::uninitialized_copy(meta_.begin_, meta_.begin_ + new_size, new_memory);
+                std::uninitialized_copy(begin_, begin_ + new_size, new_memory);
 
             // freed old storage
             release_storage();
 
-            meta_.begin_ = new_memory;
-            meta_.end_ = new_memory + new_size;
-            meta_.capacity_ = new_memory + new_capacity;
+            begin_ = new_memory;
+            end_ = new_memory + new_size;
+            capacity_ = new_memory + new_capacity;
         }
 
         void reallocate_storage_if_needed()
@@ -295,35 +298,21 @@ namespace low
             }
         }
 
-        [[no_unique_address]] allocator_type alloc_;
-        struct meta
+        void steal_pointers(vector &&r) noexcept
         {
-            meta() = default;
-            meta(meta &&r) noexcept :
-                begin_(r.begin_),
-                end_(r.end_),
-                capacity_(r.capacity_)
-            {
-                r.clear();
-            }
-            meta &operator=(meta &&r) noexcept
-            {
-                begin_ = r.begin_;
-                end_ = r.end_;
-                capacity_ = r.capacity_;
-                r.clear();
-                return *this;
-            }
-            void clear() noexcept
-            {
-                begin_ = nullptr;
-                end_ = nullptr;
-                capacity_ = nullptr;
-            }
+            begin_ = r.begin_;
+            end_ = r.end_;
+            capacity_ = r.capacity_;
 
-            pointer begin_{nullptr};
-            pointer end_{nullptr};
-            pointer capacity_{nullptr};
-        } meta_;
+            r.begin_ = nullptr;
+            r.end_ = nullptr;
+            r.capacity_ = nullptr;
+        }
+
+        pointer begin_{nullptr};
+        pointer end_{nullptr};
+        pointer capacity_{nullptr};
+
+        [[no_unique_address]] allocator_type alloc_;
     };
 }
