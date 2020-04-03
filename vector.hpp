@@ -27,12 +27,15 @@ namespace low
 
         vector() = default;
 
-        explicit vector(const allocator_type &alloc) noexcept : meta_(alloc) {}
+        explicit vector(const allocator_type &alloc) noexcept : alloc_(alloc) {}
 
-        vector(vector &&r) noexcept : meta_(std::move(r.meta_)) {}
+        vector(vector &&r) noexcept :
+            alloc_(std::move(r.alloc_)),
+            meta_(std::move(r.meta_))
+        {}
 
         vector(vector &&r, const allocator_type &alloc)
-            noexcept(allocator_traits::is_always_equal::value) : meta_(alloc)
+            noexcept(allocator_traits::is_always_equal::value) : alloc_(alloc)
         {
             // compile time knowledge, that allocators always equal
             if constexpr (allocator_traits::is_always_equal::value)
@@ -60,7 +63,7 @@ namespace low
         {}
 
         vector(const vector &r, const allocator_type &alloc) :
-            meta_(alloc)
+            alloc_(alloc)
         {
             reserve(r.size());
             meta_.end_ = std::uninitialized_copy(r.meta_.begin_, r.meta_.end_, meta_.begin_);
@@ -82,6 +85,7 @@ namespace low
             if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
             {
                 release_storage();
+                alloc_ = std::move(r.alloc_);
                 meta_ = std::move(r.meta_);
                 return *this;
             }
@@ -114,7 +118,7 @@ namespace low
             // compile time knowledge - propagate other allocator or not
             if constexpr (allocator_traits::propagate_on_container_copy_assignment::value)
             {
-                meta_ = r.meta_;
+                alloc_ = r.alloc_;
             }
             // and assign other elements using old or new allocator, depending on pocca
             assign(r.begin(), r.end());
@@ -141,7 +145,7 @@ namespace low
             // destruct old remaining elements if there are any
             for (pointer it{end}; it != meta_.end_; ++it)
             {
-                allocator_traits::destroy(meta_, it);
+                allocator_traits::destroy(alloc_, it);
             }
 
             // copy-construct the rest elements from initial [first, last)
@@ -153,7 +157,7 @@ namespace low
         void emplace_back(Args&& ...args)
         {
             reallocate_storage_if_needed();
-            allocator_traits::construct(meta_, meta_.end_, std::forward<Args>(args)...);
+            allocator_traits::construct(alloc_, meta_.end_, std::forward<Args>(args)...);
             meta_.end_ += 1u;
         }
 
@@ -191,14 +195,13 @@ namespace low
         const_iterator cbegin() const noexcept { return meta_.begin_; }
         const_iterator cend() const noexcept { return meta_.end_; }
 
-        // meet AllocatorAwareContainer requirements;
-        const allocator_type &get_allocator() const noexcept { return meta_; }
+        const allocator_type &get_allocator() const noexcept { return alloc_; }
 
         void clear() noexcept
         {
             for (auto it = begin(); it != end(); ++it)
             {
-                allocator_traits::destroy(meta_, it);
+                allocator_traits::destroy(alloc_, it);
             }
             meta_.end_ = meta_.begin_;
         }
@@ -231,7 +234,7 @@ namespace low
                 for (std::ptrdiff_t count{diff}; count < 0; ++count)
                 {
                     meta_.end_ -= 1u;
-                    allocator_traits::destroy(meta_, meta_.end_);
+                    allocator_traits::destroy(alloc_, meta_.end_);
                 }
             }
             else if (diff > 0)
@@ -246,7 +249,7 @@ namespace low
                 }
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {
-                    allocator_traits::construct(meta_, meta_.end_, value...);
+                    allocator_traits::construct(alloc_, meta_.end_, value...);
                     meta_.end_ += 1u;
                 }
             }
@@ -259,7 +262,7 @@ namespace low
             {
                 // std::allocator requires that pointer should be previously allocated by 'allocate',
                 // despite the fact that operator delete is ok with nullptr
-                allocator_traits::deallocate(meta_, meta_.begin_, capacity());
+                allocator_traits::deallocate(alloc_, meta_.begin_, capacity());
                 meta_.begin_ = nullptr;
                 meta_.end_ = nullptr;
                 meta_.capacity_ = nullptr;
@@ -269,7 +272,7 @@ namespace low
         void reallocate_storage(std::size_t new_capacity, std::size_t new_size)
         {
             // allocate new storage
-            auto new_memory = allocator_traits::allocate(meta_, new_capacity);
+            auto new_memory = allocator_traits::allocate(alloc_, new_capacity);
 
             // move old data in new storage
             if constexpr (std::is_nothrow_move_constructible_v<value_type>)
@@ -294,26 +297,21 @@ namespace low
             }
         }
 
-        // this hack with EBO(empty base optimization) allow to reduce sizeof vector when allocator is stateless
-        struct meta : allocator_type
+        [[no_unique_address]] allocator_type alloc_;
+        struct meta
         {
             meta() = default;
-            explicit meta(const allocator_type &alloc) noexcept : allocator_type(alloc) {}
-
-            meta(meta &&r) noexcept :
-                allocator_type(std::move(r))
+            meta(meta &&r) noexcept
             {
                 steal_pointers(std::move(r));
             }
             meta &operator=(meta &&r) noexcept
             {
-                allocator_type::operator=(std::move(r));
                 steal_pointers(std::move(r));
                 return *this;
             }
-            meta &operator=(const meta &r) noexcept
+            meta &operator=(const meta &) noexcept
             {
-                allocator_type::operator=(r);
                 return *this;
             }
             meta(const meta &) = delete;
