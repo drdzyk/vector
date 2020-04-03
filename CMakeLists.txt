@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
+set(CMAKE_CXX_COMPILER clang++-9)
 project(vector LANGUAGES CXX)
 
 add_compile_options(
@@ -7,7 +8,7 @@ add_compile_options(
     -Wall
     -Werror
     -Wextra
-    -Wconversion
+#    -Wconversion
     -fsanitize=address
 )
 

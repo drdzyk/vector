@@ -39,7 +39,10 @@ TEMPLATE_PRODUCT_TEST_CASE("copy assignment operator", "[low::vector][std::vecto
         using value_type = typename TestType::value_type;
         if constexpr (std::is_same_v<TestType, low::vector<value_type>>)
         {
+            #pragma clang diagnostic push
+            #pragma clang diagnostic ignored "-Wself-assign-overloaded"
             source = source;
+            #pragma clang diagnostic pop
             REQUIRE(source[0] == 7);
             REQUIRE(source[1] == 8);
         }
