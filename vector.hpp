@@ -29,13 +29,7 @@ namespace low
 
         explicit vector(const allocator_type &alloc) noexcept : meta_(alloc) {}
 
-        vector(vector &&r) noexcept :
-            meta_(std::move(r.meta_))
-        {
-            r.meta_.begin_ = nullptr;
-            r.meta_.end_ = nullptr;
-            r.meta_.capacity_ = nullptr;
-        }
+        vector(vector &&r) noexcept : meta_(std::move(r.meta_)) {}
 
         vector(vector &&r, const allocator_type &alloc)
             noexcept(allocator_traits::is_always_equal::value) : meta_(alloc)
@@ -89,9 +83,6 @@ namespace low
             {
                 release_storage();
                 meta_ = std::move(r.meta_);
-                r.meta_.begin_ = nullptr;
-                r.meta_.end_ = nullptr;
-                r.meta_.capacity_ = nullptr;
                 return *this;
             }
             // if propagation prohibited, perform runtime dispatch:
@@ -123,13 +114,7 @@ namespace low
             // compile time knowledge - propagate other allocator or not
             if constexpr (allocator_traits::propagate_on_container_copy_assignment::value)
             {
-                auto self_begin = meta_.begin_;
-                auto self_end = meta_.end_;
-                auto self_capacity = meta_.capacity_;
                 meta_ = r.meta_;
-                meta_.begin_ = self_begin;
-                meta_.end_ = self_end;
-                meta_.capacity_ = self_capacity;
             }
             // and assign other elements using old or new allocator, depending on pocca
             assign(r.begin(), r.end());
@@ -314,6 +299,25 @@ namespace low
         {
             meta() = default;
             explicit meta(const allocator_type &alloc) noexcept : allocator_type(alloc) {}
+
+            meta(meta &&r) noexcept :
+                allocator_type(std::move(r))
+            {
+                steal_pointers(std::move(r));
+            }
+            meta &operator=(meta &&r) noexcept
+            {
+                allocator_type::operator=(std::move(r));
+                steal_pointers(std::move(r));
+                return *this;
+            }
+            meta &operator=(const meta &r) noexcept
+            {
+                allocator_type::operator=(r);
+                return *this;
+            }
+            meta(const meta &) = delete;
+            ~meta() = default;
 
             void steal_pointers(meta &&other) noexcept
             {
