@@ -20,6 +20,7 @@
 // 9) add operator ==()
 // 10) remove sanitizers from benchmark
 // 11) use catch2?
+// 12) somewhere std::distance, somewhere raw operations
 
 template <typename T>
 struct Alloc
