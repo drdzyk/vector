@@ -135,7 +135,7 @@ namespace low
             // copy-assign elements until either:
             // 1) all elements from [first, last) copied or
             // 2) elements in *this are over
-            const It pivot = first + std::min(size(), distance);
+            const It pivot = first + static_cast<std::ptrdiff_t>(std::min(size(), distance));
             const pointer end = std::copy(first, pivot, meta_.begin_);
 
             // destruct old remaining elements if there are any
@@ -178,8 +178,8 @@ namespace low
             return *(meta_.begin_ + idx);
         }
 
-        std::size_t size() const noexcept { return meta_.end_ - meta_.begin_; }
-        std::size_t capacity() const noexcept { return meta_.capacity_ - meta_.begin_; }
+        std::size_t size() const noexcept { return static_cast<std::size_t>(meta_.end_ - meta_.begin_); }
+        std::size_t capacity() const noexcept { return static_cast<std::size_t>(meta_.capacity_ - meta_.begin_); }
         bool empty() const noexcept { return size() == 0u; }
 
         iterator begin() noexcept { return meta_.begin_; }
