@@ -41,14 +41,14 @@ namespace low
             if constexpr (allocator_traits::is_always_equal::value)
             {
                 // if so, just steal a pointers
-                meta_.steal_pointers(std::move(r.meta_));
+                meta_ = std::move(r.meta_);
                 return;
             }
             // otherwise perform runtime dispatch
             if (r.get_allocator() == alloc)
             {
                 // just steal a pointers
-                meta_.steal_pointers(std::move(r.meta_));
+                meta_ = std::move(r.meta_);
             }
             else
             {
@@ -94,7 +94,7 @@ namespace low
             {
                 // if allocators equal, just steal resources
                 release_storage();
-                meta_.steal_pointers(std::move(r.meta_));
+                meta_ = std::move(r.meta_);
             }
             else
             {
@@ -263,9 +263,7 @@ namespace low
                 // std::allocator requires that pointer should be previously allocated by 'allocate',
                 // despite the fact that operator delete is ok with nullptr
                 allocator_traits::deallocate(alloc_, meta_.begin_, capacity());
-                meta_.begin_ = nullptr;
-                meta_.end_ = nullptr;
-                meta_.capacity_ = nullptr;
+                meta_.clear();
             }
         }
 
@@ -301,30 +299,26 @@ namespace low
         struct meta
         {
             meta() = default;
-            meta(meta &&r) noexcept
+            meta(meta &&r) noexcept :
+                begin_(r.begin_),
+                end_(r.end_),
+                capacity_(r.capacity_)
             {
-                steal_pointers(std::move(r));
+                r.clear();
             }
             meta &operator=(meta &&r) noexcept
             {
-                steal_pointers(std::move(r));
+                begin_ = r.begin_;
+                end_ = r.end_;
+                capacity_ = r.capacity_;
+                r.clear();
                 return *this;
             }
-            meta &operator=(const meta &) noexcept
+            void clear() noexcept
             {
-                return *this;
-            }
-            meta(const meta &) = delete;
-            ~meta() = default;
-
-            void steal_pointers(meta &&other) noexcept
-            {
-                begin_ = other.begin_;
-                end_ = other.end_;
-                capacity_ = other.capacity_;
-                other.begin_ = nullptr;
-                other.end_ = nullptr;
-                other.capacity_ = nullptr;
+                begin_ = nullptr;
+                end_ = nullptr;
+                capacity_ = nullptr;
             }
 
             pointer begin_{nullptr};
