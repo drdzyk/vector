@@ -33,3 +33,27 @@ TEST_CASE("allocator-extended move constructor may throws with not always equals
     using vec = low::vector<int, alloc>;
     static_assert(!noexcept(vec{vec{}, alloc{}}));
 }
+
+TEST_CASE("move assign operator may throws", "[vector]")
+{
+    using alloc = alloc::DynamicEq<int>;
+    using vec = low::vector<int, alloc>;
+    vec v;
+    static_assert(!noexcept(v = vec{}));
+}
+
+TEST_CASE("move assign operator noexcept with always equals allocators", "[vector]")
+{
+    using alloc = alloc::StaticEq<int>;
+    using vec = low::vector<int, alloc>;
+    vec v;
+    static_assert(noexcept(v = vec{}));
+}
+
+TEST_CASE("move assign operator noexcept with pocma", "[vector]")
+{
+    using alloc = alloc::DynamicEqPocma<int>;
+    using vec = low::vector<int, alloc>;
+    vec v;
+    static_assert(noexcept(v = vec{}));
+}
