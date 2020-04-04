@@ -82,11 +82,15 @@ namespace low
             {
                 return *this;
             }
-            // compile time knowledge, that we need to steal resources from other and propagate allocator
-            if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
+            // compile time knowledge, that we need to steal resources from other
+            if constexpr (allocator_traits::is_always_equal::value ||
+                allocator_traits::propagate_on_container_move_assignment::value)
             {
                 release_storage();
-                alloc_ = std::move(r.alloc_);
+                if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
+                {
+                    alloc_ = std::move(r.alloc_); // and propagate allocator
+                }
                 steal_pointers(std::move(r));
                 return *this;
             }
