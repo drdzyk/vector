@@ -195,11 +195,7 @@ namespace low
 
         const allocator_type &get_allocator() const noexcept { return alloc_; }
 
-        void clear() noexcept
-        {
-            destroy(begin_, end_);
-            end_ = begin_;
-        }
+        void clear() noexcept { destroy(begin_, end_); }
 
         void shrink_to_fit() noexcept
         {
@@ -234,11 +230,9 @@ namespace low
             static_assert((std::is_same_v<U, value_type> && ...),
                     "if 'value' present, then it should be of 'value_type' type");
 
-            iterator pivot = begin_ + new_size;
-            if (pivot < end_)
+            if (iterator it{begin_ + new_size}; it < end_)
             {
-                destroy(pivot, end_);
-                end_ = pivot;
+                destroy(it, end_);
                 return;
             }
             if (capacity() < new_size)
@@ -246,23 +240,23 @@ namespace low
                 std::size_t new_capacity = get_next_capacity_or(size(), new_size);
                 reallocate_storage(new_capacity, size());
             }
-            pivot = begin_ + new_size;
-            for (; end_ < pivot; ++end_)
+            for (iterator it{begin_ + new_size}; end_ < it; ++end_)
             {
                 allocator_traits::construct(alloc_, end_, value...);
             }
         }
 
-        void destroy(iterator first, iterator last) noexcept
+        void destroy(iterator first, iterator &last) noexcept
         {
             // optimization: don't call destructors for trivial types
             if constexpr(!std::is_trivial_v<value_type>)
             {
-                for (; first < last; ++first)
+                for (auto it{first}; it < last; ++it)
                 {
-                    allocator_traits::destroy(alloc_, first);
+                    allocator_traits::destroy(alloc_, it);
                 }
             }
+            last = first;
         }
 
         void release_storage() noexcept
