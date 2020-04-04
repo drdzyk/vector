@@ -286,7 +286,7 @@ namespace low
             auto new_memory = allocator_traits::allocate(alloc_, new_capacity);
 
             // move old data in new storage
-            if constexpr (std::is_nothrow_move_constructible_v<value_type>)
+            if constexpr (is_nothrow_move_constructible_weak_v)
                 std::uninitialized_move(begin_, begin_ + new_size, new_memory);
             else
                 std::uninitialized_copy(begin_, begin_ + new_size, new_memory);
