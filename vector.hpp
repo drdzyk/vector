@@ -230,29 +230,27 @@ namespace low
             static_assert((std::is_same_v<U, value_type> && ...),
                     "if 'value' present, then it should be of 'value_type' type");
 
-            const auto diff = static_cast<std::ptrdiff_t>(new_size) - static_cast<std::ptrdiff_t>(size());
-            if (diff < 0)
+            iterator pivot = begin_ + new_size;
+            if (pivot < end_)
             {
-                for (std::ptrdiff_t count{diff}; count < 0; ++count)
-                {
-                    allocator_traits::destroy(alloc_, --end_);
-                }
+                destroy(pivot, end_);
+                end_ = pivot;
+                return;
             }
-            else if (diff > 0)
+            if (capacity() < new_size)
             {
-                if (capacity() < new_size)
-                {
-                    std::size_t current_size{size()};
-                    std::size_t new_capacity{current_size ? current_size * 2 : 1};
-                    reallocate_storage(
-                       new_size > new_capacity ? new_size : new_capacity,
-                        current_size);
-                }
-                for (std::ptrdiff_t count{0}; count < diff; ++count)
-                {
-                    allocator_traits::construct(alloc_, end_++, value...);
-                }
+                std::size_t current_size{size()};
+                std::size_t new_capacity{current_size ? current_size * 2 : 1};
+                reallocate_storage(
+                   new_size > new_capacity ? new_size : new_capacity,
+                    current_size);
             }
+            pivot = begin_ + new_size;
+            for (; end_ < pivot; ++end_)
+            {
+                allocator_traits::construct(alloc_, end_, value...);
+            }
+
         }
 
         void destroy(iterator first, iterator last) noexcept
