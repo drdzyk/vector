@@ -218,6 +218,9 @@ namespace low
         ~vector() noexcept { release_storage(); }
 
     private:
+        // this mean if move ctor noexcept - use it; but if not, and no copy ctor, then
+        // use throwing move ctor anyway. In last case strong exception guarantee may be violated.
+        // See std::move_if_noexcept
         constexpr static bool is_nothrow_move_constructible_weak_v =
             std::is_nothrow_move_constructible_v<value_type> || !std::is_copy_constructible_v<value_type>;
         using move_iterator_if_noexcept_t = std::conditional_t<
