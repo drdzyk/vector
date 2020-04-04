@@ -76,15 +76,14 @@ namespace low
             end_ = std::uninitialized_copy(list.begin(), list.end(), begin_);
         }
 
-        vector &operator=(vector &&r) noexcept
+        vector &operator=(vector &&r) noexcept(IsEqualOrPocma())
         {
             if (this == &r) // be on a safe side
             {
                 return *this;
             }
             // compile time knowledge, that we need to steal resources from other
-            if constexpr (allocator_traits::is_always_equal::value ||
-                allocator_traits::propagate_on_container_move_assignment::value)
+            if constexpr (IsEqualOrPocma())
             {
                 move_assign_impl(std::move(r));
                 return *this;
@@ -219,6 +218,12 @@ namespace low
         ~vector() noexcept { release_storage(); }
 
     private:
+        static constexpr bool IsEqualOrPocma()
+        {
+            return allocator_traits::is_always_equal::value ||
+                   allocator_traits::propagate_on_container_move_assignment::value;
+        }
+
         template <typename ...U>
         void resize_impl(std::size_t new_size, const U& ...value)
         {
