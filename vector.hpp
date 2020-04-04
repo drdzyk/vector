@@ -150,7 +150,11 @@ namespace low
         template <typename ...Args>
         reference emplace_back(Args&& ...args)
         {
-            reallocate_storage_if_needed();
+            if (auto current_size = size(); current_size == capacity())
+            {
+                std::size_t new_capacity = get_next_capacity_or(current_size);
+                reallocate_storage(new_capacity, current_size);
+            }
             allocator_traits::construct(alloc_, end_, std::forward<Args>(args)...);
             return *end_++;
         }
@@ -239,18 +243,14 @@ namespace low
             }
             if (capacity() < new_size)
             {
-                std::size_t current_size{size()};
-                std::size_t new_capacity{current_size ? current_size * 2 : 1};
-                reallocate_storage(
-                   new_size > new_capacity ? new_size : new_capacity,
-                    current_size);
+                std::size_t new_capacity = get_next_capacity_or(size(), new_size);
+                reallocate_storage(new_capacity, size());
             }
             pivot = begin_ + new_size;
             for (; end_ < pivot; ++end_)
             {
                 allocator_traits::construct(alloc_, end_, value...);
             }
-
         }
 
         void destroy(iterator first, iterator last) noexcept
@@ -279,32 +279,30 @@ namespace low
             }
         }
 
-        void reallocate_storage(std::size_t new_capacity, std::size_t new_size)
+        static constexpr std::size_t get_next_capacity_or(
+            std::size_t current_size, std::size_t required_size = 0) noexcept
+        {
+            std::size_t new_capacity{current_size ? current_size * 2 : 1};
+            return required_size > new_capacity ? required_size : new_capacity;
+        }
+
+        void reallocate_storage(std::size_t new_capacity, std::size_t current_size)
         {
             // allocate new storage
             auto new_memory = allocator_traits::allocate(alloc_, new_capacity);
 
             // move old data in new storage
             if constexpr (is_nothrow_move_constructible_weak_v)
-                std::uninitialized_move(begin_, begin_ + new_size, new_memory);
+                std::uninitialized_move(begin_, begin_ + current_size, new_memory);
             else
-                std::uninitialized_copy(begin_, begin_ + new_size, new_memory);
+                std::uninitialized_copy(begin_, begin_ + current_size, new_memory);
 
             // freed old storage
             release_storage();
 
             begin_ = new_memory;
-            end_ = new_memory + new_size;
+            end_ = new_memory + current_size;
             capacity_ = new_memory + new_capacity;
-        }
-
-        void reallocate_storage_if_needed()
-        {
-            if (auto current_size = size(); current_size == capacity())
-            {
-                std::size_t new_capacity{current_size ? current_size * 2 : 1};
-                reallocate_storage(new_capacity, current_size);
-            }
         }
 
         void move_assign_impl(vector &&r)
