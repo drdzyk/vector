@@ -137,7 +137,7 @@ namespace low
             // 1) all elements from [first, last) copied or
             // 2) elements in *this are over
             const It pivot = first + static_cast<std::ptrdiff_t>(std::min(size(), distance));
-            const pointer end = std::copy(first, pivot, begin_);
+            const iterator end = std::copy(first, pivot, begin_);
 
             // destruct old remaining elements if there are any
             destroy(end, end_);
@@ -260,7 +260,7 @@ namespace low
             // optimization: don't call destructors for trivial types
             if constexpr(!std::is_trivial_v<value_type>)
             {
-                for (; first != last; ++first)
+                for (; first < last; ++first)
                 {
                     allocator_traits::destroy(alloc_, first);
                 }
@@ -269,9 +269,9 @@ namespace low
 
         void release_storage() noexcept
         {
-            clear();
             if (begin_) // don't deallocate nullptr
             {
+                destroy(begin_, end_);
                 // std::allocator requires that pointer should be previously allocated by 'allocate',
                 // despite the fact that operator delete is ok with nullptr
                 allocator_traits::deallocate(alloc_, begin_, capacity());
