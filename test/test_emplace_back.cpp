@@ -13,23 +13,35 @@ TEMPLATE_PRODUCT_TEST_CASE("emplace_back", "[low::vector][std::vector]",
     REQUIRE(v.size() == 0);
     REQUIRE(v.capacity() == 0);
 
-    v.emplace_back(7);
+    auto &ref1 = v.emplace_back(7);
     REQUIRE(v.size() == 1);
     REQUIRE(v.capacity() == 1);
     REQUIRE(v[0] == 7);
 
-    v.emplace_back(8);
+    ref1 = 11;
+    REQUIRE(v[0] == 11);
+
+    auto &ref2 = v.emplace_back(8);
     REQUIRE(v.size() == 2);
     REQUIRE(v.capacity() == 2);
-    REQUIRE(v[0] == 7);
+    REQUIRE(v[0] == 11);
     REQUIRE(v[1] == 8);
 
-    v.emplace_back(9);
+    ref2 = 22;
+    REQUIRE(v[0] == 11);
+    REQUIRE(v[1] == 22);
+
+    auto &ref3 = v.emplace_back(9);
     REQUIRE(v.size() == 3);
     REQUIRE(v.capacity() == 4);
-    REQUIRE(v[0] == 7);
-    REQUIRE(v[1] == 8);
+    REQUIRE(v[0] == 11);
+    REQUIRE(v[1] == 22);
     REQUIRE(v[2] == 9);
+
+    ref3 = 33;
+    REQUIRE(v[0] == 11);
+    REQUIRE(v[1] == 22);
+    REQUIRE(v[2] == 33);
 }
 
 void assert_content_eq(const std::vector<int> &src, const low::vector<int> &v2)

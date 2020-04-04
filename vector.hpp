@@ -151,11 +151,11 @@ namespace low
         }
 
         template <typename ...Args>
-        void emplace_back(Args&& ...args)
+        reference emplace_back(Args&& ...args)
         {
             reallocate_storage_if_needed();
             allocator_traits::construct(alloc_, end_, std::forward<Args>(args)...);
-            end_ += 1u;
+            return *end_++;
         }
 
         void reserve(std::size_t new_capacity)
@@ -218,7 +218,7 @@ namespace low
         ~vector() noexcept { release_storage(); }
 
     private:
-        // this mean if move ctor noexcept - use it; but if not, and no copy ctor, then
+        // weak mean if move ctor noexcept - use it; but if it is not, and there is no copy ctor, then
         // use throwing move ctor anyway. In last case strong exception guarantee may be violated.
         // See std::move_if_noexcept
         constexpr static bool is_nothrow_move_constructible_weak_v =

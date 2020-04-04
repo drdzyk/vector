@@ -47,7 +47,7 @@ TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor tracker, equal a
 }
 
 TEMPLATE_PRODUCT_TEST_CASE("allocator-extended move constructor tracker with wrong allocator", "",
-    (low::vector), ((TrackedType<>, alloc::WrongEq<TrackedType<>>))) // std::vector son't use is_always_equal here
+    (low::vector), ((TrackedType<>, alloc::WrongEq<TrackedType<>>))) // std::vector don't use is_always_equal here
 {
     const auto tracker = std::make_shared<TypeTracker>();
     TestType source;
