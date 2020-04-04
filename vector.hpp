@@ -140,10 +140,7 @@ namespace low
             const pointer end = std::copy(first, pivot, begin_);
 
             // destruct old remaining elements if there are any
-            for (pointer it{end}; it != end_; ++it)
-            {
-                allocator_traits::destroy(alloc_, it);
-            }
+            destroy(end, end_);
 
             // copy-construct the rest elements from initial [first, last)
             // range if there are any
@@ -196,10 +193,7 @@ namespace low
 
         void clear() noexcept
         {
-            for (auto it = begin(); it != end(); ++it)
-            {
-                allocator_traits::destroy(alloc_, it);
-            }
+            destroy(begin_, end_);
             end_ = begin_;
         }
 
@@ -257,6 +251,18 @@ namespace low
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {
                     allocator_traits::construct(alloc_, end_++, value...);
+                }
+            }
+        }
+
+        void destroy(iterator first, iterator last) noexcept
+        {
+            // optimization: don't call destructors for trivial types
+            if constexpr(!std::is_trivial_v<value_type>)
+            {
+                for (; first != last; ++first)
+                {
+                    allocator_traits::destroy(alloc_, first);
                 }
             }
         }
