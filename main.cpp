@@ -21,6 +21,7 @@
 // 10) remove sanitizers from benchmark
 // 11) use catch2?
 // 12) somewhere std::distance, somewhere raw operations
+// 13) move assign op: use move iterator only when move ctor/assign noexcept
 
 template <typename T>
 struct Alloc

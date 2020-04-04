@@ -12,6 +12,7 @@ add_executable(unit_test
     test_initializer_list_constructor.cpp
     test_iterators.cpp
     test_move_assignment_operator.cpp
+    test_move_assignment_operator_tracker.cpp
     test_move_constructor.cpp
     test_move_constructor_tracker.cpp
     test_move_if_noexcept.cpp
