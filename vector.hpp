@@ -241,8 +241,7 @@ namespace low
             {
                 for (std::ptrdiff_t count{diff}; count < 0; ++count)
                 {
-                    end_ -= 1u;
-                    allocator_traits::destroy(alloc_, end_);
+                    allocator_traits::destroy(alloc_, --end_);
                 }
             }
             else if (diff > 0)
@@ -257,8 +256,7 @@ namespace low
                 }
                 for (std::ptrdiff_t count{0}; count < diff; ++count)
                 {
-                    allocator_traits::construct(alloc_, end_, value...);
-                    end_ += 1u;
+                    allocator_traits::construct(alloc_, end_++, value...);
                 }
             }
         }
