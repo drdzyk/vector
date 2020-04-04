@@ -86,20 +86,13 @@ namespace low
             if constexpr (allocator_traits::is_always_equal::value ||
                 allocator_traits::propagate_on_container_move_assignment::value)
             {
-                release_storage();
-                if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
-                {
-                    alloc_ = std::move(r.alloc_); // and propagate allocator
-                }
-                steal_pointers(std::move(r));
+                move_assign_impl(std::move(r));
                 return *this;
             }
-            // if propagation prohibited, perform runtime dispatch:
+            // if there is no compile time properties, perform runtime dispatch:
             if (get_allocator() == r.get_allocator())
             {
-                // if allocators equal, just steal resources
-                release_storage();
-                steal_pointers(std::move(r));
+                move_assign_impl(std::move(r));
             }
             else
             {
@@ -300,6 +293,17 @@ namespace low
                 std::size_t new_capacity{current_size ? current_size * 2 : 1};
                 reallocate_storage(new_capacity, current_size);
             }
+        }
+
+        void move_assign_impl(vector &&r)
+        {
+            release_storage();
+            // propagate allocator if specified
+            if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
+            {
+                alloc_ = std::move(r.alloc_);
+            }
+            steal_pointers(std::move(r));
         }
 
         void steal_pointers(vector &&r) noexcept
