@@ -48,9 +48,11 @@ TEMPLATE_PRODUCT_TEST_CASE("move assignment operator", "[low::vector][std::vecto
 
 TEMPLATE_PRODUCT_TEST_CASE("move assignment operator different allocators", "[low::vector][std::vector]",
     (low::vector, std::vector), (
+        (DynamicInt, alloc::StaticEq<DynamicInt>),
+        (DynamicInt, alloc::StaticEqPocma<DynamicInt>),
         (DynamicInt, alloc::DynamicEq<DynamicInt>),
-        (DynamicInt, alloc::DynamicEqPocma<DynamicInt>),
         (DynamicInt, alloc::DynamicNotEq<DynamicInt>),
+        (DynamicInt, alloc::DynamicEqPocma<DynamicInt>),
         (DynamicInt, alloc::DynamicNotEqPocma<DynamicInt>)
     )
 )
