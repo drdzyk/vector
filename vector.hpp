@@ -159,6 +159,11 @@ namespace low
             return *end_++;
         }
 
+        void pop_back()
+        {
+            allocator_traits::destroy(alloc_, --end_);
+        }
+
         void reserve(std::size_t new_capacity)
         {
             if (new_capacity > capacity())
