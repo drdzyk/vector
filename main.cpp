@@ -22,6 +22,8 @@
 // 11) use catch2?
 // 12) somewhere std::distance, somewhere raw operations
 // 13) move assign op: use move iterator only when move ctor/assign noexcept
+// 14) clang-9 + c++2a + -fmodules
+// 15) emplace_back tracker test
 
 template <typename T>
 struct Alloc
@@ -43,20 +45,6 @@ struct Alloc
     {
         std::allocator<T>{}.deallocate(__p, 0);
     }
-};
-
-struct A
-{
-    A() = default;
-    A(int){}
-//    bool operator ==(const A&) { return true; }
-    friend bool operator ==(const A&, const A&) { return true; }
-
-};
-
-struct B : A
-{
-
 };
 std::size_t global_tracker_alloc{0}, global_tracker_dealloc{0};
 template <typename T>
@@ -87,43 +75,66 @@ struct NotEqualAllocator
     friend bool operator==(const NotEqualAllocator&, const NotEqualAllocator&) noexcept { return false; }
     friend bool operator!=(const NotEqualAllocator&, const NotEqualAllocator&) noexcept { return true; }
 };
+
+struct A
+{
+    A(int i) : i_(i)
+    {
+        std::cerr << "ctor: " << i_ << std::endl;
+    }
+    A(const A &r) : i_(r.i_)
+    {
+        std::cerr << "copy_ctor: " << i_ << std::endl;
+                throw std::runtime_error{"hello"};
+
+    }
+    A(A &&r) : i_(r.i_)
+    {
+        r.i_ = 0;
+        std::cerr << "move_ctor: " << i_ << std::endl;
+//        throw std::runtime_error{"hello"};
+    }
+    A& operator=(const A &r)
+    {
+        i_ = r.i_;
+        std::cerr << "copy_assign: " << i_ << std::endl;
+//        throw std::runtime_error{"hello"};
+
+        return *this;
+    }
+    ~A()
+    {
+        std::cerr << "dtor: " << i_ << std::endl;
+    }
+
+    int i_{0};
+};
+
 template <typename T> class X;
 int main() {
+    std::vector<A> s;
+    s.emplace_back(11);
 
-    low::vector<int, NotEqualAllocator<int>> src;
-    std::cerr << "\nalloc  : " << global_tracker_alloc << std::endl;
-    std::cerr << "\ndealloc: " << global_tracker_dealloc << std::endl;
-    src.emplace_back(3);
-    src.emplace_back(3);
-    src.emplace_back(3);
-    src.emplace_back(3);
-    assert(src[0] == 3);
-    assert(src[1] == 3);
-    assert(src[2] == 3);
-    assert(src[3] == 3);
+    std::vector<A> v;
+//    v.reserve(3);
+    v.emplace_back(7);
+    v.emplace_back(8);
 
-    std::cerr << "\nalloc  : " << global_tracker_alloc << std::endl;
-    std::cerr << "\ndealloc: " << global_tracker_dealloc << std::endl;
+    try
+    {
+        v.insert(std::next(v.begin()), s.begin(), s.end());
+//        v.insert(v.end(), s.begin(), s.end());
+    }
+    catch (...)
+    {
 
-    low::vector<int, NotEqualAllocator<int>>::allocator_type other;
-    low::vector<int, NotEqualAllocator<int>> copy{std::move(src), other};
+    }
 
-    std::cerr << "\ncopy[0]: " << copy[0] << std::endl;
-    std::cerr << "\ncopy[1]: " << copy[1] << std::endl;
-    std::cerr << "\ncopy[2]: " << copy[2] << std::endl;
-    std::cerr << "\ncopy[3]: " << copy[3] << std::endl;
-
-    std::cerr << "\nalloc  : " << global_tracker_alloc << std::endl;
-    std::cerr << "\ndealloc: " << global_tracker_dealloc << std::endl;
-    assert(copy[0] == 3);
-    assert(copy[1] == 3);
-    assert(copy[2] == 3);
-    assert(copy[3] == 3);
-
-
-//
-//    X<decltype(copy)::allocator_type> x;
-
+    for (const auto &n : v)
+    {
+        std::cerr << n.i_ << " ";
+    }
+    std::cerr << std::endl;
 
     return 0;
 }

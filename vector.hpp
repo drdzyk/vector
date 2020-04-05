@@ -147,6 +147,46 @@ namespace low
             end_ = std::uninitialized_copy(pivot, last, end);
         }
 
+        template <typename It>
+        void insert(const_iterator const_pos, It first, It last)
+        {
+            iterator pos = begin_ + std::distance(const_iterator{begin_}, const_pos);
+            auto distance = static_cast<std::size_t>(std::distance(first, last));
+            if (capacity() - size() < distance)
+            {
+                std::size_t new_capacity{size() + distance};
+                auto new_begin = allocator_traits::allocate(alloc_, new_capacity);
+                auto new_end = new_begin;
+                if constexpr (is_nothrow_move_constructible_weak_v)
+                    new_end = std::uninitialized_move(begin_, pos, new_begin);
+                else
+                    new_end = std::uninitialized_copy(begin_, pos, new_begin);
+
+                new_end = std::uninitialized_copy(first, last, new_end);
+                new_end = std::uninitialized_copy(pos, end_, new_end);
+
+                release_storage();
+
+                begin_ = new_begin;
+                end_ = new_end;
+                capacity_ = new_begin + new_capacity;
+            }
+            else if (distance > 0)
+            {
+                auto right_elements_count = static_cast<std::size_t>(end_ - pos);
+                auto to_uninit_move_count = std::min(right_elements_count, distance);
+                auto tmp = uninitialized_move_backward(end_ - to_uninit_move_count, end_, end_ + distance);
+
+                auto to_move_count = right_elements_count - to_uninit_move_count;
+                std::move_backward(pos, pos + to_move_count, tmp);
+
+                std::copy(first, first + to_uninit_move_count, pos);
+                std::uninitialized_copy(first + to_uninit_move_count, last, pos + to_uninit_move_count);
+
+                end_ += distance;
+            }
+        }
+
         template <typename ...Args>
         reference emplace_back(Args&& ...args)
         {
@@ -227,6 +267,16 @@ namespace low
 
         constexpr static bool is_equal_or_pocma_v = allocator_traits::is_always_equal::value ||
                                                   allocator_traits::propagate_on_container_move_assignment::value;
+
+        template <typename InputIt, typename OutputIt>
+        static OutputIt uninitialized_move_backward(InputIt first, InputIt last, OutputIt result)
+        {
+            while (first < last)
+            {
+                new(--result) value_type{std::move(*--last)};
+            }
+            return result;
+        }
 
         template <typename ...U>
         void resize_impl(std::size_t new_size, const U& ...value)
