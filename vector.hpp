@@ -237,14 +237,18 @@ namespace low
 
             if (iterator it{begin_ + new_size}; it < end_)
             {
+                // user provide size smaller than current size,
+                // so we have to truncate vector and return
                 destroy(it, end_);
                 return;
             }
+            // allocate new capacity if needed
             if (capacity() < new_size)
             {
                 std::size_t new_capacity = get_next_capacity_or(size(), new_size);
                 reallocate_storage(new_capacity, size());
             }
+            // and populate vector with copy of value, or with value-initialization
             if constexpr (sizeof...(U) == 1)
                 std::uninitialized_fill(end_, begin_ + new_size, value...);
             else
