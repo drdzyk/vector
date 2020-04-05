@@ -245,10 +245,11 @@ namespace low
                 std::size_t new_capacity = get_next_capacity_or(size(), new_size);
                 reallocate_storage(new_capacity, size());
             }
-            for (iterator it{begin_ + new_size}; end_ < it; ++end_)
-            {
-                allocator_traits::construct(alloc_, end_, value...);
-            }
+            if constexpr (sizeof...(U) == 1)
+                std::uninitialized_fill(end_, begin_ + new_size, value...);
+            else
+                std::uninitialized_value_construct(end_, begin_ + new_size);
+            end_ = begin_ + new_size;
         }
 
         void destroy(iterator first, iterator &last) noexcept
