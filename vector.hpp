@@ -337,4 +337,23 @@ namespace low
 
         [[no_unique_address]] allocator_type alloc_;
     };
+
+    template <typename T, typename A>
+    bool operator ==(const vector<T, A> &l, const vector<T, A> &r) noexcept
+    {
+        auto lit = l.cbegin();
+        auto rit = r.cbegin();
+        while (lit != l.cend() && rit != r.cend())
+        {
+            if(*lit++ != *rit++)
+                return false;
+        }
+        return lit == l.cend() && rit == r.cend();
+    }
+
+    template <typename T, typename A>
+    bool operator !=(const vector<T, A> &l, const vector<T, A> &r) noexcept
+    {
+        return !(l == r);
+    }
 }

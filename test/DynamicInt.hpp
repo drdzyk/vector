@@ -40,6 +40,12 @@ public:
         }
         return *lhs.i_ == *rhs.i_;
     }
+
+    friend bool operator!=(const DynamicInt &lhs, const DynamicInt &rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
 private:
     int *i_{nullptr};
 };
