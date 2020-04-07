@@ -156,18 +156,10 @@ namespace low
             {
                 std::size_t new_capacity{size() + distance};
                 auto new_begin = allocator_traits::allocate(alloc_, new_capacity);
-                auto new_end = new_begin;
-                if constexpr (is_nothrow_move_constructible_weak_v)
-                    new_end = std::uninitialized_move(begin_, pos, new_begin);
-                else
-                    new_end = std::uninitialized_copy(begin_, pos, new_begin);
 
+                auto new_end = uninitialized_move_if_noexcept(begin_, pos, new_begin);
                 new_end = std::uninitialized_copy(first, last, new_end);
-
-                if constexpr (is_nothrow_move_constructible_weak_v)
-                    new_end = std::uninitialized_move(pos, end_, new_end);
-                else
-                    new_end = std::uninitialized_copy(pos, end_, new_end);
+                new_end = uninitialized_move_if_noexcept(pos, end_, new_end);
 
                 release_storage();
 
@@ -273,6 +265,14 @@ namespace low
         constexpr static bool is_equal_or_pocma_v = allocator_traits::is_always_equal::value ||
                                                   allocator_traits::propagate_on_container_move_assignment::value;
 
+        static iterator uninitialized_move_if_noexcept(iterator first, iterator last, iterator result)
+        {
+            if constexpr (is_nothrow_move_constructible_weak_v)
+                return std::uninitialized_move(first, last, result);
+            else
+                return std::uninitialized_copy(first, last, result);
+        }
+
         template <typename InputIt, typename OutputIt>
         static OutputIt uninitialized_move_backward(InputIt first, InputIt last, OutputIt result)
         {
@@ -349,13 +349,8 @@ namespace low
         {
             // allocate new storage
             auto new_memory = allocator_traits::allocate(alloc_, new_capacity);
-
             // move old data in new storage
-            if constexpr (is_nothrow_move_constructible_weak_v)
-                std::uninitialized_move(begin_, begin_ + current_size, new_memory);
-            else
-                std::uninitialized_copy(begin_, begin_ + current_size, new_memory);
-
+            uninitialized_move_if_noexcept(begin_, begin_ + current_size, new_memory);
             // freed old storage
             release_storage();
 
