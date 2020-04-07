@@ -169,16 +169,16 @@ namespace low
             }
             else if (distance > 0)
             {
-                auto right_elements_count = static_cast<std::size_t>(end_ - pos);
-                auto to_uninit_move_count = std::min(right_elements_count, distance);
-                auto tmp = uninitialized_move_backward(end_ - to_uninit_move_count, end_, end_ + distance);
+                auto elements_in_self_to_move_count = static_cast<std::size_t>(end_ - pos);
+                auto to_uninit_move_count = std::min(elements_in_self_to_move_count, distance);
 
-                auto to_move_count = right_elements_count - to_uninit_move_count;
-                std::move_backward(pos, pos + to_move_count, tmp);
+                const auto pivot1 = end_ - to_uninit_move_count;
+                uninitialized_move_backward(pivot1, end_, end_ + distance);
+                std::move_backward(pos, pivot1, end_);
 
-                auto pivot = first + static_cast<std::ptrdiff_t>(to_uninit_move_count);
-                std::copy(first, pivot, pos);
-                std::uninitialized_copy(pivot, last, pos + to_uninit_move_count);
+                const auto pivot2 = first + static_cast<std::ptrdiff_t>(to_uninit_move_count);
+                std::copy(first, pivot2, pos);
+                std::uninitialized_copy(pivot2, last, pos + to_uninit_move_count);
 
                 end_ += distance;
             }
