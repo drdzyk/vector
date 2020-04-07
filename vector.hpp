@@ -154,6 +154,7 @@ namespace low
             auto distance = static_cast<std::size_t>(std::distance(first, last));
             if (capacity() - size() < distance)
             {
+                // capacity is not enough, so allocate new memory and insert all there
                 std::size_t new_capacity{size() + distance};
                 auto new_begin = allocator_traits::allocate(alloc_, new_capacity);
 
@@ -169,6 +170,7 @@ namespace low
             }
             else if (distance > 0)
             {
+                // capacity is enough, insert data in place
                 auto elements_in_self_to_move_count = static_cast<std::size_t>(end_ - pos);
                 auto to_uninit_move_count = std::min(elements_in_self_to_move_count, distance);
 
@@ -344,6 +346,8 @@ namespace low
         static constexpr std::size_t get_next_capacity_or(
             std::size_t current_size, std::size_t required_size = 0) noexcept
         {
+            // basically, vector growths as power of 2 from current size,
+            // but if required capacity is too much - returns it
             std::size_t new_capacity{current_size ? current_size * 2 : 1};
             return required_size > new_capacity ? required_size : new_capacity;
         }
@@ -388,6 +392,7 @@ namespace low
         pointer end_{nullptr};
         pointer capacity_{nullptr};
 
+        // usually allocator is stateless, thus we don't occupy extra space for it
         [[no_unique_address]] allocator_type alloc_;
     };
 
