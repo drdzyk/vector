@@ -239,6 +239,18 @@ namespace low
 
         const allocator_type &get_allocator() const noexcept { return alloc_; }
 
+        iterator erase(const_iterator first, const_iterator last)
+        {
+            if (first != last)
+            {
+                auto first_mutable = const_cast<iterator>(first);
+                auto last_mutable = const_cast<iterator>(last);
+                destroy(first_mutable, last_mutable);
+                end_ = std::uninitialized_move(last_mutable, end_, first_mutable);
+            }
+            return end_;
+        }
+
         void clear() noexcept
         {
             end_ = destroy(begin_, end_);

@@ -124,13 +124,15 @@ int main() {
     s.emplace_back(11);
 
     std::vector<A> v;
-//    v.reserve(3);
+    v.reserve(3);
     v.emplace_back(7);
     v.emplace_back(8);
+    v.emplace_back(9);
 
+    v.erase(v.begin(), v.begin() + 1);
     try
     {
-        v.insert(std::next(v.begin()), s.begin(), s.end());
+//        v.insert(std::next(v.begin()), s.begin(), s.end());
 //        v.insert(std::next(v.begin()), std::move_iterator{s.begin()}, std::move_iterator{s.end()});
 //        v.insert(v.end(), s.begin(), s.end());
     }

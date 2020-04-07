@@ -10,6 +10,7 @@ add_executable(unit_test
     test_copy_constructor.cpp
     test_copy_constructor_tracker.cpp
     test_emplace_back.cpp
+    test_erase.cpp
     test_initializer_list_constructor.cpp
     test_insert.cpp
     test_insert_tracker.cpp
