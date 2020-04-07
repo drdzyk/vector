@@ -84,3 +84,29 @@ TEMPLATE_PRODUCT_TEST_CASE("erase", "[low::vector][std::vector]",
         REQUIRE(v == TestType{1, 5});
     }
 }
+
+TEMPLATE_PRODUCT_TEST_CASE("single argument erase", "[low::vector][std::vector]",
+                           (low::vector, std::vector), (int, double, DynamicInt))
+{
+    TestType v{1, 2, 3, 4};
+    SECTION("erase")
+    {
+        v.erase(v.begin());
+        REQUIRE(v == TestType{2, 3, 4});
+    }
+    SECTION("erase")
+    {
+        v.erase(std::next(v.begin()));
+        REQUIRE(v == TestType{1, 3, 4});
+    }
+    SECTION("erase")
+    {
+        v.erase(std::next(v.begin(), 2));
+        REQUIRE(v == TestType{1, 2, 4});
+    }
+    SECTION("erase")
+    {
+        v.erase(std::next(v.begin(), 3));
+        REQUIRE(v == TestType{1, 2, 3});
+    }
+}

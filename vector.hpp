@@ -250,6 +250,12 @@ namespace low
             return end_;
         }
 
+        iterator erase(const_iterator pos)
+        {
+            // pos is forbidden to be end()
+            return erase(pos, std::next(pos));
+        }
+
         void clear() noexcept
         {
             end_ = destroy(begin_, end_);
