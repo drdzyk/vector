@@ -245,8 +245,7 @@ namespace low
             {
                 auto first_mutable = const_cast<iterator>(first);
                 auto last_mutable = const_cast<iterator>(last);
-                destroy(first_mutable, last_mutable);
-                end_ = std::uninitialized_move(last_mutable, end_, first_mutable);
+                end_ = destroy(std::move(last_mutable, end_, first_mutable), end_);
             }
             return end_;
         }
