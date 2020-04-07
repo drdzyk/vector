@@ -237,7 +237,10 @@ namespace low
 
         const allocator_type &get_allocator() const noexcept { return alloc_; }
 
-        void clear() noexcept { destroy(begin_, end_); }
+        void clear() noexcept
+        {
+            end_ = destroy(begin_, end_);
+        }
 
         void shrink_to_fit() noexcept
         {
@@ -294,7 +297,7 @@ namespace low
             {
                 // user provide size smaller than current size,
                 // so we have to truncate vector and return
-                destroy(it, end_);
+                end_ = destroy(it, end_);
                 return;
             }
             // allocate new capacity if needed
@@ -311,7 +314,7 @@ namespace low
             end_ = begin_ + new_size;
         }
 
-        void destroy(iterator first, iterator &last) noexcept
+        iterator destroy(iterator first, iterator last) noexcept
         {
             // optimization: don't call destructors for trivial types
             if constexpr(!std::is_trivial_v<value_type>)
@@ -321,7 +324,7 @@ namespace low
                     allocator_traits::destroy(alloc_, it);
                 }
             }
-            last = first;
+            return first;
         }
 
         void release_storage() noexcept
