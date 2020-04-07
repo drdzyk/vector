@@ -163,7 +163,11 @@ namespace low
                     new_end = std::uninitialized_copy(begin_, pos, new_begin);
 
                 new_end = std::uninitialized_copy(first, last, new_end);
-                new_end = std::uninitialized_copy(pos, end_, new_end);
+
+                if constexpr (is_nothrow_move_constructible_weak_v)
+                    new_end = std::uninitialized_move(pos, end_, new_end);
+                else
+                    new_end = std::uninitialized_copy(pos, end_, new_end);
 
                 release_storage();
 
@@ -180,8 +184,9 @@ namespace low
                 auto to_move_count = right_elements_count - to_uninit_move_count;
                 std::move_backward(pos, pos + to_move_count, tmp);
 
-                std::copy(first, first + to_uninit_move_count, pos);
-                std::uninitialized_copy(first + to_uninit_move_count, last, pos + to_uninit_move_count);
+                auto pivot = first + static_cast<std::ptrdiff_t>(to_uninit_move_count);
+                std::copy(first, pivot, pos);
+                std::uninitialized_copy(pivot, last, pos + to_uninit_move_count);
 
                 end_ += distance;
             }

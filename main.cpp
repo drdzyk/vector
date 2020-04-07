@@ -85,10 +85,10 @@ struct A
     A(const A &r) : i_(r.i_)
     {
         std::cerr << "copy_ctor: " << i_ << std::endl;
-                throw std::runtime_error{"hello"};
+//                throw std::runtime_error{"hello"};
 
     }
-    A(A &&r) : i_(r.i_)
+    A(A &&r): i_(r.i_)
     {
         r.i_ = 0;
         std::cerr << "move_ctor: " << i_ << std::endl;
@@ -98,6 +98,14 @@ struct A
     {
         i_ = r.i_;
         std::cerr << "copy_assign: " << i_ << std::endl;
+//        throw std::runtime_error{"hello"};
+
+        return *this;
+    }
+    A& operator=(A &&r)
+    {
+        i_ = r.i_;
+        std::cerr << "move_assign: " << i_ << std::endl;
 //        throw std::runtime_error{"hello"};
 
         return *this;
@@ -123,6 +131,7 @@ int main() {
     try
     {
         v.insert(std::next(v.begin()), s.begin(), s.end());
+//        v.insert(std::next(v.begin()), std::move_iterator{s.begin()}, std::move_iterator{s.end()});
 //        v.insert(v.end(), s.begin(), s.end());
     }
     catch (...)
