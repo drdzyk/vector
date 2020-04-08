@@ -5,6 +5,12 @@
 
 namespace low
 {
+    template <typename It, typename = void>
+    struct IsIterable : std::false_type{};
+
+    template <typename It>
+    struct IsIterable<It, std::void_t<typename std::iterator_traits<It>::value_type>> : std::true_type{};
+
     template <typename T, typename Alloc = std::allocator<T>>
     class vector
     {
@@ -147,7 +153,7 @@ namespace low
             end_ = std::uninitialized_copy(pivot, last, end);
         }
 
-        template <typename It>
+        template <typename It, typename = std::enable_if_t<IsIterable<It>::value>>
         void insert(const_iterator const_pos, It first, It last)
         {
             iterator pos = begin_ + std::distance(const_iterator{begin_}, const_pos);
