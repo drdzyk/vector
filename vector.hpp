@@ -155,24 +155,24 @@ namespace low
 
         void insert(const_iterator pos, std::size_t count, const value_type &value)
         {
-            insert_base(pos, count, value);
+            insert_base(pos, count, value, std::false_type{});
         }
 
         void insert(const_iterator pos, const value_type &value)
         {
-            insert_base(pos, 1, value);
+            insert_base(pos, 1, value, std::false_type{});
         }
 
         void insert(const_iterator pos, value_type &&value)
         {
-            insert_base(pos, 1, std::move(value));
+            insert_base(pos, 1, std::move(value), std::false_type{});
         }
 
         template <typename It, typename = std::enable_if_t<IsIterable<It>::value>>
         void insert(const_iterator pos, It first, It last)
         {
             auto distance = static_cast<std::size_t>(std::distance(first, last));
-            insert_base(pos, distance, first, last);
+            insert_base(pos, distance, first, std::true_type{});
         }
 
         template <typename ...Args>
@@ -295,23 +295,21 @@ namespace low
         }
 
         template <typename It>
-        iterator move_data_in_new_storage(iterator new_storage, std::size_t count, It first, It last)
+        iterator move_data_in_new_storage(iterator new_storage, std::size_t count, It first, std::true_type)
         {
-            (void) count;
-            return std::uninitialized_copy(first, last, new_storage);
+            return std::uninitialized_copy_n(first, count, new_storage);
         }
 
         template <typename It>
-        void move_data_in_self(iterator pos, std::size_t to_uninit_move_count, std::size_t distance, It first, It last)
+        void move_data_in_self(iterator pos, std::size_t to_uninit_move_count, std::size_t distance, It first, std::true_type)
         {
-            (void) distance;
-            const auto pivot = first + static_cast<std::ptrdiff_t>(to_uninit_move_count);
-            std::copy(first, pivot, pos);
-            std::uninitialized_copy(pivot, last, pos + to_uninit_move_count);
+            auto out = std::copy_n(first, to_uninit_move_count, pos);
+            const auto next = first + static_cast<std::ptrdiff_t>(to_uninit_move_count);
+            std::uninitialized_copy_n(next, distance - to_uninit_move_count, out);
         }
 
         template<typename U>
-        iterator move_data_in_new_storage(iterator new_storage, std::size_t count, U &&value)
+        iterator move_data_in_new_storage(iterator new_storage, std::size_t count, U &&value, std::false_type)
         {
             static_assert(std::is_same_v<std::decay_t<U>, value_type>, "'value' is just universal reference");
             for (; count > 0; --count)
@@ -322,7 +320,7 @@ namespace low
         }
 
         template<typename U>
-        void move_data_in_self(iterator pos, std::size_t to_uninit_move_count, std::size_t count, U &&value)
+        void move_data_in_self(iterator pos, std::size_t to_uninit_move_count, std::size_t count, U &&value, std::false_type)
         {
             static_assert(std::is_same_v<std::decay_t<U>, value_type>, "'value' is just universal reference");
             if (count == 1)
@@ -343,8 +341,8 @@ namespace low
             }
         }
 
-        template <typename ...Args>
-        void insert_base(const_iterator const_pos, std::size_t distance, Args&& ...args)
+        template <typename U, typename Tag>
+        void insert_base(const_iterator const_pos, std::size_t distance, U &&args, Tag tag)
         {
             iterator pos = begin_ + std::distance(const_iterator{begin_}, const_pos);
             if (capacity() - size() < distance)
@@ -354,7 +352,7 @@ namespace low
                 auto new_begin = allocator_traits::allocate(alloc_, new_capacity);
 
                 auto new_end = uninitialized_move_if_noexcept(begin_, pos, new_begin);
-                new_end = move_data_in_new_storage(new_end, distance, std::forward<Args>(args)...);
+                new_end = move_data_in_new_storage(new_end, distance, std::forward<U>(args), tag);
                 new_end = uninitialized_move_if_noexcept(pos, end_, new_end);
 
                 release_storage();
@@ -373,7 +371,7 @@ namespace low
                 uninitialized_move_backward(pivot, end_, end_ + distance);
                 std::move_backward(pos, pivot, end_);
 
-                move_data_in_self(pos, to_uninit_move_count, distance, std::forward<Args>(args)...);
+                move_data_in_self(pos, to_uninit_move_count, distance, std::forward<U>(args), tag);
 
                 end_ += distance;
             }
