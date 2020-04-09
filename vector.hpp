@@ -363,7 +363,14 @@ namespace low
 
                 if (count == 1)
                 {
-                    allocator_traits::construct(alloc_, pos, std::forward<U>(value));
+                    if (pos == end_)
+                    {
+                        allocator_traits::construct(alloc_, pos, std::forward<U>(value));
+                    }
+                    else
+                    {
+                        *pos = std::forward<U>(value);
+                    }
                 }
                 else
                 {
