@@ -155,56 +155,23 @@ namespace low
 
         void insert(const_iterator pos, std::size_t count, const value_type &value)
         {
-            return insert_impl(pos, count, value);
+            return insert_fill(pos, count, value);
         }
 
         void insert(const_iterator pos, const value_type &value)
         {
-            return insert_impl(pos, 1, value);
+            return insert_fill(pos, 1, value);
         }
 
         void insert(const_iterator pos, value_type &&value)
         {
-            return insert_impl(pos, 1, std::move(value));
+            return insert_fill(pos, 1, std::move(value));
         }
 
         template <typename It, typename = std::enable_if_t<IsIterable<It>::value>>
-        void insert(const_iterator const_pos, It first, It last)
+        void insert(const_iterator pos, It first, It last)
         {
-            iterator pos = begin_ + std::distance(const_iterator{begin_}, const_pos);
-            auto distance = static_cast<std::size_t>(std::distance(first, last));
-            if (capacity() - size() < distance)
-            {
-                // capacity is not enough, so allocate new memory and insert all there
-                std::size_t new_capacity{size() + distance};
-                auto new_begin = allocator_traits::allocate(alloc_, new_capacity);
-
-                auto new_end = uninitialized_move_if_noexcept(begin_, pos, new_begin);
-                new_end = std::uninitialized_copy(first, last, new_end);
-                new_end = uninitialized_move_if_noexcept(pos, end_, new_end);
-
-                release_storage();
-
-                begin_ = new_begin;
-                end_ = new_end;
-                capacity_ = new_begin + new_capacity;
-            }
-            else if (distance > 0)
-            {
-                // capacity is enough, insert data in place
-                auto elements_in_self_to_move_count = static_cast<std::size_t>(end_ - pos);
-                auto to_uninit_move_count = std::min(elements_in_self_to_move_count, distance);
-
-                const auto pivot1 = end_ - to_uninit_move_count;
-                uninitialized_move_backward(pivot1, end_, end_ + distance);
-                std::move_backward(pos, pivot1, end_);
-
-                const auto pivot2 = first + static_cast<std::ptrdiff_t>(to_uninit_move_count);
-                std::copy(first, pivot2, pos);
-                std::uninitialized_copy(pivot2, last, pos + to_uninit_move_count);
-
-                end_ += distance;
-            }
+            insert_range(pos, first, last);
         }
 
         template <typename ...Args>
@@ -326,8 +293,47 @@ namespace low
             return result;
         }
 
+        template <typename It>
+        void insert_range(const_iterator const_pos, It first, It last)
+        {
+            iterator pos = begin_ + std::distance(const_iterator{begin_}, const_pos);
+            auto distance = static_cast<std::size_t>(std::distance(first, last));
+            if (capacity() - size() < distance)
+            {
+                // capacity is not enough, so allocate new memory and insert all there
+                std::size_t new_capacity{size() + distance};
+                auto new_begin = allocator_traits::allocate(alloc_, new_capacity);
+
+                auto new_end = uninitialized_move_if_noexcept(begin_, pos, new_begin);
+                new_end = std::uninitialized_copy(first, last, new_end);
+                new_end = uninitialized_move_if_noexcept(pos, end_, new_end);
+
+                release_storage();
+
+                begin_ = new_begin;
+                end_ = new_end;
+                capacity_ = new_begin + new_capacity;
+            }
+            else if (distance > 0)
+            {
+                // capacity is enough, insert data in place
+                auto elements_in_self_to_move_count = static_cast<std::size_t>(end_ - pos);
+                auto to_uninit_move_count = std::min(elements_in_self_to_move_count, distance);
+
+                const auto pivot1 = end_ - to_uninit_move_count;
+                uninitialized_move_backward(pivot1, end_, end_ + distance);
+                std::move_backward(pos, pivot1, end_);
+
+                const auto pivot2 = first + static_cast<std::ptrdiff_t>(to_uninit_move_count);
+                std::copy(first, pivot2, pos);
+                std::uninitialized_copy(pivot2, last, pos + to_uninit_move_count);
+
+                end_ += distance;
+            }
+        }
+
         template<typename U>
-        void insert_impl(const_iterator const_pos, std::size_t count, U &&value)
+        void insert_fill(const_iterator const_pos, std::size_t count, U &&value)
         {
             static_assert(std::is_same_v<std::decay_t<U>, value_type>, "'value' is just universal reference");
 
