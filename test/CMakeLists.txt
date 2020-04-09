@@ -15,6 +15,7 @@ add_executable(unit_test
     test_initializer_list_constructor.cpp
     test_insert.cpp
     test_insert_copy.cpp
+    test_insert_copy_tracker.cpp
     test_insert_tracker.cpp
     test_iterators.cpp
     test_move_assignment_operator.cpp
