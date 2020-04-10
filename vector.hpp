@@ -170,7 +170,7 @@ namespace low
             // copy-assign elements until either:
             // 1) all elements from [first, last) copied or
             // 2) elements in *this are over
-            const It pivot = first + static_cast<std::ptrdiff_t>(std::min(size(), distance));
+            const It pivot = std::next(first, static_cast<std::ptrdiff_t>(std::min(size(), distance)));
             const iterator end = std::copy(first, pivot, begin_);
 
             // destruct old remaining elements if there are any
