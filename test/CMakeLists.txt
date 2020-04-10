@@ -5,6 +5,7 @@ add_executable(unit_test
     test_assign_tracker.cpp
     test_clear.cpp
     test_comparision_operator.cpp
+    test_constructors.cpp
     test_copy_assignment_operator.cpp
     test_copy_assignment_operator_tracker.cpp
     test_copy_constructor.cpp
