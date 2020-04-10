@@ -259,31 +259,31 @@ namespace low
             end_ = destroy(begin_, end_);
         }
 
-        void insert(const_iterator pos, std::size_t count, const value_type &value)
+        iterator insert(const_iterator pos, std::size_t count, const value_type &value)
         {
-            insert_base(pos, count, value);
+            return insert_base(pos, count, value);
         }
 
-        void insert(const_iterator pos, const value_type &value)
+        iterator insert(const_iterator pos, const value_type &value)
         {
-            insert_base(pos, 1, value);
+            return insert_base(pos, 1, value);
         }
 
-        void insert(const_iterator pos, value_type &&value)
+        iterator insert(const_iterator pos, value_type &&value)
         {
-            insert_base(pos, 1, std::move(value));
+            return insert_base(pos, 1, std::move(value));
         }
 
         template <typename It, typename = Iterable<It>>
-        void insert(const_iterator pos, It first, It last)
+        iterator insert(const_iterator pos, It first, It last)
         {
             auto distance = static_cast<std::size_t>(std::distance(first, last));
-            insert_base(pos, distance, first);
+            return insert_base(pos, distance, first);
         }
 
-        void insert(const_iterator pos, std::initializer_list<value_type> ilist)
+        iterator insert(const_iterator pos, std::initializer_list<value_type> ilist)
         {
-            insert(pos, ilist.begin(), ilist.end());
+            return insert(pos, ilist.begin(), ilist.end());
         }
 
         iterator erase(const_iterator first, const_iterator last)
@@ -418,7 +418,7 @@ namespace low
         }
 
         template <typename U>
-        void insert_base(const_iterator const_pos, std::size_t distance, U &&args)
+        iterator insert_base(const_iterator const_pos, std::size_t distance, U &&args)
         {
             iterator pos = begin_ + std::distance(const_iterator{begin_}, const_pos);
             if (capacity() - size() < distance)
@@ -428,6 +428,7 @@ namespace low
                 auto new_begin = allocator_traits::allocate(alloc_, new_capacity);
 
                 auto new_end = uninitialized_move_if_noexcept(begin_, pos, new_begin);
+                auto result_pos = new_end;
                 new_end = move_data_in_new_storage(new_end, distance, std::forward<U>(args));
                 new_end = uninitialized_move_if_noexcept(pos, end_, new_end);
 
@@ -436,6 +437,7 @@ namespace low
                 begin_ = new_begin;
                 end_ = new_end;
                 capacity_ = new_begin + new_capacity;
+                return result_pos;
             }
             else if (distance > 0)
             {
@@ -451,6 +453,7 @@ namespace low
 
                 end_ += distance;
             }
+            return pos;
         }
 
         template <typename ...U>
