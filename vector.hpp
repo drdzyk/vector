@@ -133,8 +133,14 @@ namespace low
             return *this;
         }
 
-        void swap(vector &r)
+        void swap(vector &r) noexcept
         {
+            if constexpr (allocator_traits::propagate_on_container_swap::value)
+            {
+                // if this condition is true, then swap allocators shouldn't throw
+                // see https://en.cppreference.com/w/cpp/named_req/Allocator
+                std::swap(alloc_, r.alloc_);
+            }
             std::swap(begin_, r.begin_);
             std::swap(end_, r.end_);
             std::swap(capacity_, r.capacity_);
