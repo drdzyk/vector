@@ -87,6 +87,25 @@ namespace low
             end_ = std::uninitialized_copy(list.begin(), list.end(), begin_);
         }
 
+        vector(std::size_t count, const value_type &value, const allocator_type &alloc = allocator_type{}) :
+            alloc_(alloc)
+        {
+            insert(begin_, count, value);
+        }
+
+        explicit vector(std::size_t count, const allocator_type &alloc = allocator_type{}) :
+            alloc_(alloc)
+        {
+            resize(count);
+        }
+
+        template<typename It, typename = Iterable<It>>
+        vector(It first, It last, const allocator_type &alloc = allocator_type{}) :
+            alloc_(alloc)
+        {
+            assign(first, last);
+        }
+
         ~vector() noexcept { release_storage(); }
 
         vector &operator=(vector &&r) noexcept(is_equal_or_pocma_v)
