@@ -260,3 +260,43 @@ TEMPLATE_PRODUCT_TEST_CASE("insert, enough capacity 3", "[low::vector][std::vect
         REQUIRE(v == TestType{11, 22, 33, 44, 7, 8, 9, 10});
     }
 }
+
+
+TEMPLATE_PRODUCT_TEST_CASE("insert std::initializer_list overload", "[low::vector][std::vector]",
+                           (low::vector, std::vector), (int, double, DynamicInt))
+{
+    using value_type = typename TestType::value_type;
+    std::initializer_list<value_type> source{value_type{7}, value_type{8}, value_type{9}, value_type{10}};
+
+    TestType v;
+    v.reserve(8);
+    v.emplace_back(11);
+    v.emplace_back(22);
+    v.emplace_back(33);
+    v.emplace_back(44);
+    SECTION("insert")
+    {
+        v.insert(v.begin() , source.begin(), source.end());
+        REQUIRE(v == TestType{7, 8, 9, 10, 11, 22, 33, 44});
+    }
+    SECTION("insert")
+    {
+        v.insert(std::next(v.begin()) , source.begin(), source.end());
+        REQUIRE(v == TestType{11, 7, 8, 9, 10, 22, 33, 44});
+    }
+    SECTION("insert")
+    {
+        v.insert(std::next(v.begin(), 2) , source.begin(), source.end());
+        REQUIRE(v == TestType{11, 22, 7, 8, 9, 10, 33, 44});
+    }
+    SECTION("insert")
+    {
+        v.insert(std::next(v.begin(), 3) , source.begin(), source.end());
+        REQUIRE(v == TestType{11, 22, 33, 7, 8, 9, 10, 44});
+    }
+    SECTION("insert")
+    {
+        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(v == TestType{11, 22, 33, 44, 7, 8, 9, 10});
+    }
+}
