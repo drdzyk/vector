@@ -234,6 +234,15 @@ namespace low
             return *(begin_ + idx);
         }
 
+        reference front() noexcept { return *begin_; }
+        const_reference front() const noexcept { return *begin_; }
+
+        reference back() noexcept { return *(end_ - 1); }
+        const_reference back() const noexcept { return *(end_ - 1); }
+
+        pointer data() noexcept { return begin_; }
+        const_pointer data() const noexcept { return begin_; }
+
         std::size_t size() const noexcept { return static_cast<std::size_t>(end_ - begin_); }
         std::size_t capacity() const noexcept { return static_cast<std::size_t>(capacity_ - begin_); }
         bool empty() const noexcept { return size() == 0u; }
