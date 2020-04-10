@@ -6,10 +6,14 @@
 namespace low
 {
     template <typename It, typename = void>
-    struct IsIterable : std::false_type{};
+    struct _IsIterable : std::false_type{};
+    template <typename It>
+    struct _IsIterable<It, std::void_t<typename std::iterator_traits<It>::value_type>> : std::true_type{};
 
     template <typename It>
-    struct IsIterable<It, std::void_t<typename std::iterator_traits<It>::value_type>> : std::true_type{};
+    using Iterable = std::enable_if_t<_IsIterable<std::decay_t<It>>::value>;
+    template <typename It>
+    using NotIterable = std::enable_if_t<!_IsIterable<std::decay_t<It>>::value>;
 
     template <typename T, typename Alloc = std::allocator<T>>
     class vector
@@ -155,24 +159,24 @@ namespace low
 
         void insert(const_iterator pos, std::size_t count, const value_type &value)
         {
-            insert_base(pos, count, value, std::false_type{});
+            insert_base(pos, count, value);
         }
 
         void insert(const_iterator pos, const value_type &value)
         {
-            insert_base(pos, 1, value, std::false_type{});
+            insert_base(pos, 1, value);
         }
 
         void insert(const_iterator pos, value_type &&value)
         {
-            insert_base(pos, 1, std::move(value), std::false_type{});
+            insert_base(pos, 1, std::move(value));
         }
 
-        template <typename It, typename = std::enable_if_t<IsIterable<It>::value>>
+        template <typename It, typename = Iterable<It>>
         void insert(const_iterator pos, It first, It last)
         {
             auto distance = static_cast<std::size_t>(std::distance(first, last));
-            insert_base(pos, distance, first, std::true_type{});
+            insert_base(pos, distance, first);
         }
 
         template <typename ...Args>
@@ -294,22 +298,22 @@ namespace low
             return result;
         }
 
-        template <typename It>
-        iterator move_data_in_new_storage(iterator new_storage, std::size_t count, It first, std::true_type)
+        template <typename It, typename = Iterable<It>>
+        iterator move_data_in_new_storage(iterator new_storage, std::size_t count, It first)
         {
             return std::uninitialized_copy_n(first, count, new_storage);
         }
 
-        template <typename It>
-        void move_data_in_self(iterator pos, std::size_t to_uninit_move_count, std::size_t distance, It first, std::true_type)
+        template <typename It, typename = Iterable<It>>
+        void move_data_in_self(iterator pos, std::size_t to_uninit_move_count, std::size_t distance, It first)
         {
             auto out = std::copy_n(first, to_uninit_move_count, pos);
             const auto next = first + static_cast<std::ptrdiff_t>(to_uninit_move_count);
             std::uninitialized_copy_n(next, distance - to_uninit_move_count, out);
         }
 
-        template<typename U>
-        iterator move_data_in_new_storage(iterator new_storage, std::size_t count, U &&value, std::false_type)
+        template<typename U, typename = NotIterable<U>>
+        iterator move_data_in_new_storage(iterator new_storage, std::size_t count, U &&value)
         {
             static_assert(std::is_same_v<std::decay_t<U>, value_type>, "'value' is just universal reference");
             for (; count > 0; --count)
@@ -319,8 +323,8 @@ namespace low
             return new_storage;
         }
 
-        template<typename U>
-        void move_data_in_self(iterator pos, std::size_t to_uninit_move_count, std::size_t count, U &&value, std::false_type)
+        template<typename U, typename = NotIterable<U>>
+        void move_data_in_self(iterator pos, std::size_t to_uninit_move_count, std::size_t count, U &&value)
         {
             static_assert(std::is_same_v<std::decay_t<U>, value_type>, "'value' is just universal reference");
             if (count == 1)
@@ -341,8 +345,8 @@ namespace low
             }
         }
 
-        template <typename U, typename Tag>
-        void insert_base(const_iterator const_pos, std::size_t distance, U &&args, Tag tag)
+        template <typename U>
+        void insert_base(const_iterator const_pos, std::size_t distance, U &&args)
         {
             iterator pos = begin_ + std::distance(const_iterator{begin_}, const_pos);
             if (capacity() - size() < distance)
@@ -352,7 +356,7 @@ namespace low
                 auto new_begin = allocator_traits::allocate(alloc_, new_capacity);
 
                 auto new_end = uninitialized_move_if_noexcept(begin_, pos, new_begin);
-                new_end = move_data_in_new_storage(new_end, distance, std::forward<U>(args), tag);
+                new_end = move_data_in_new_storage(new_end, distance, std::forward<U>(args));
                 new_end = uninitialized_move_if_noexcept(pos, end_, new_end);
 
                 release_storage();
@@ -371,7 +375,7 @@ namespace low
                 uninitialized_move_backward(pivot, end_, end_ + distance);
                 std::move_backward(pos, pivot, end_);
 
-                move_data_in_self(pos, to_uninit_move_count, distance, std::forward<U>(args), tag);
+                move_data_in_self(pos, to_uninit_move_count, distance, std::forward<U>(args));
 
                 end_ += distance;
             }
