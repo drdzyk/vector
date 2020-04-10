@@ -131,6 +131,20 @@ struct tracked_allocator_pocca : tracked_allocator<T, true>
     using propagate_on_container_copy_assignment = std::integral_constant<bool, pocca>;
 };
 
+template <typename T, bool pocs>
+struct tracked_allocator_pocs : tracked_allocator<T, true>
+{
+    using value_type = T;
+
+    template<typename U>
+    struct rebind
+    {
+        using other = tracked_allocator_pocs<U, pocs>;
+    };
+
+    using propagate_on_container_swap = std::integral_constant<bool, pocs>;
+};
+
 struct Fixture
 {
     ~Fixture() noexcept
@@ -262,6 +276,24 @@ TEST_CASE_METHOD(Fixture, "copy assign operator; pocca true; allocators not equa
 
     copy = source;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .copy_assign = 1}));
+}
+
+TEST_CASE_METHOD(Fixture, "swap propagate_on_container_swap false")
+{
+    low::vector<int, tracked_allocator_pocs<int, false>> source, copy;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+
+    copy.swap(source);
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+}
+
+TEST_CASE_METHOD(Fixture, "swap propagate_on_container_swap true")
+{
+    low::vector<int, tracked_allocator_pocs<int, true>> source, copy;
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
+
+    copy.swap(source);
+    REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .move_ctor = 1, .move_assign = 2, .dtor = 1}));
 }
 
 TEST_CASE_METHOD(Fixture, "track allocations")
