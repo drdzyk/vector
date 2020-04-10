@@ -205,6 +205,9 @@ namespace low
             return *end_++;
         }
 
+        void push_back(value_type &&value) { emplace_back(std::move(value)); }
+        void push_back(const value_type &value) { emplace_back(value); }
+
         void pop_back()
         {
             allocator_traits::destroy(alloc_, --end_);
