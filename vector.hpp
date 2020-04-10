@@ -281,6 +281,11 @@ namespace low
             insert_base(pos, distance, first);
         }
 
+        void insert(const_iterator pos, std::initializer_list<value_type> ilist)
+        {
+            insert(pos, ilist.begin(), ilist.end());
+        }
+
         iterator erase(const_iterator first, const_iterator last)
         {
             if (first != last)
