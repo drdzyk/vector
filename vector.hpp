@@ -135,6 +135,9 @@ namespace low
             else
             {
                 // otherwise, perform element-wise move
+                using move_iterator_if_noexcept_t = std::conditional_t<
+                    is_nothrow_move_constructible_weak_v, std::move_iterator<iterator>, iterator>;
+
                 assign(move_iterator_if_noexcept_t{r.begin()}, move_iterator_if_noexcept_t{r.end()});
             }
             return *this;
@@ -360,8 +363,6 @@ namespace low
         // See std::move_if_noexcept
         constexpr static bool is_nothrow_move_constructible_weak_v =
             std::is_nothrow_move_constructible_v<value_type> || !std::is_copy_constructible_v<value_type>;
-        using move_iterator_if_noexcept_t = std::conditional_t<
-            is_nothrow_move_constructible_weak_v, std::move_iterator<iterator>, iterator>;
 
         constexpr static bool is_equal_or_pocma_v = allocator_traits::is_always_equal::value ||
                                                   allocator_traits::propagate_on_container_move_assignment::value;
