@@ -7,6 +7,38 @@
 #include "vector.hpp"
 #include "DynamicInt.hpp"
 
+TEMPLATE_PRODUCT_TEST_CASE("insert from empty conainer", "[low::vector][std::vector]",
+                           (low::vector, std::vector), (int, double, DynamicInt))
+{
+    using value_type = typename TestType::value_type;
+    const std::array<value_type, 0> source{};
+
+    SECTION("insert")
+    {
+        TestType v;
+        REQUIRE(v.insert(v.end(), source.begin(), source.end()) == v.end());
+        REQUIRE(v.empty());
+    }
+    SECTION("insert")
+    {
+        TestType v{7, 8, 9};
+        REQUIRE(v.insert(v.end(), source.begin(), source.end()) == v.end());
+        REQUIRE(v == TestType{7, 8, 9});
+    }
+    SECTION("insert")
+    {
+        TestType v{7, 8, 9};
+        REQUIRE(v.insert(v.begin(), source.begin(), source.end()) == v.begin());
+        REQUIRE(v == TestType{7, 8, 9});
+    }
+    SECTION("insert")
+    {
+        TestType v{7, 8, 9};
+        REQUIRE(v.insert(std::next(v.begin()), source.begin(), source.end()) == std::next(v.begin()));
+        REQUIRE(v == TestType{7, 8, 9});
+    }
+}
+
 TEMPLATE_PRODUCT_TEST_CASE("insert to end, not enough capacity", "[low::vector][std::vector]",
                            (low::vector, std::vector), (int, double, DynamicInt))
 {
@@ -16,14 +48,14 @@ TEMPLATE_PRODUCT_TEST_CASE("insert to end, not enough capacity", "[low::vector][
     SECTION("insert to empty container")
     {
         TestType v;
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{7, 8, 9});
     }
     SECTION("insert to not empty container")
     {
         TestType v;
         v.emplace_back(11);
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 7, 8, 9});
     }
     SECTION("insert to not empty container")
@@ -31,10 +63,11 @@ TEMPLATE_PRODUCT_TEST_CASE("insert to end, not enough capacity", "[low::vector][
         TestType v;
         v.emplace_back(11);
         v.emplace_back(22);
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 7, 8, 9});
     }
 }
+
 TEMPLATE_PRODUCT_TEST_CASE("insert to end, not enough capacity 2", "[low::vector][std::vector]",
                            (low::vector, std::vector), (int, double, DynamicInt))
 {
@@ -45,7 +78,7 @@ TEMPLATE_PRODUCT_TEST_CASE("insert to end, not enough capacity 2", "[low::vector
     {
         TestType v;
         v.reserve(1);
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{7, 8, 9});
     }
     SECTION("insert to not empty container")
@@ -53,7 +86,7 @@ TEMPLATE_PRODUCT_TEST_CASE("insert to end, not enough capacity 2", "[low::vector
         TestType v;
         v.reserve(2);
         v.emplace_back(11);
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 7, 8, 9});
     }
     SECTION("insert to not empty container")
@@ -62,7 +95,7 @@ TEMPLATE_PRODUCT_TEST_CASE("insert to end, not enough capacity 2", "[low::vector
         v.reserve(4);
         v.emplace_back(11);
         v.emplace_back(22);
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 7, 8, 9});
     }
 }
@@ -80,27 +113,27 @@ TEMPLATE_PRODUCT_TEST_CASE("insert, not enough capacity", "[low::vector][std::ve
     v.emplace_back(44);
     SECTION("insert")
     {
-        v.insert(v.begin() , source.begin(), source.end());
+        REQUIRE(*v.insert(v.begin() , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{7, 8, 11, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin()) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin()) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 7, 8, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 2) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 2) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 7, 8, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 3) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 3) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 7, 8, 44});
     }
     SECTION("insert")
     {
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 44, 7, 8});
     }
 }
@@ -119,27 +152,27 @@ TEMPLATE_PRODUCT_TEST_CASE("insert, enough capacity", "[low::vector][std::vector
     v.emplace_back(44);
     SECTION("insert")
     {
-        v.insert(v.begin() , source.begin(), source.end());
+        REQUIRE(*v.insert(v.begin() , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{7, 11, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin()) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin()) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 7, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 2) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 2) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 7, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 3) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 3) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 7, 44});
     }
     SECTION("insert")
     {
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 44, 7});
     }
 }
@@ -158,27 +191,27 @@ TEMPLATE_PRODUCT_TEST_CASE("insert, enough capacity 1", "[low::vector][std::vect
     v.emplace_back(44);
     SECTION("insert")
     {
-        v.insert(v.begin() , source.begin(), source.end());
+        REQUIRE(*v.insert(v.begin() , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{7, 8, 11, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin()) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin()) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 7, 8, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 2) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 2) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 7, 8, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 3) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 3) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 7, 8, 44});
     }
     SECTION("insert")
     {
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 44, 7, 8});
     }
 }
@@ -197,27 +230,27 @@ TEMPLATE_PRODUCT_TEST_CASE("insert, enough capacity 2", "[low::vector][std::vect
     v.emplace_back(44);
     SECTION("insert")
     {
-        v.insert(v.begin() , source.begin(), source.end());
+        REQUIRE(*v.insert(v.begin() , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{7, 8, 9, 11, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin()) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin()) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 7, 8, 9, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 2) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 2) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 7, 8, 9, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 3) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 3) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 7, 8, 9, 44});
     }
     SECTION("insert")
     {
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 44, 7, 8, 9});
     }
 }
@@ -236,27 +269,27 @@ TEMPLATE_PRODUCT_TEST_CASE("insert, enough capacity 3", "[low::vector][std::vect
     v.emplace_back(44);
     SECTION("insert")
     {
-        v.insert(v.begin() , source.begin(), source.end());
+        REQUIRE(*v.insert(v.begin() , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{7, 8, 9, 10, 11, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin()) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin()) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 7, 8, 9, 10, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 2) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 2) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 7, 8, 9, 10, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 3) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 3) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 7, 8, 9, 10, 44});
     }
     SECTION("insert")
     {
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 44, 7, 8, 9, 10});
     }
 }
@@ -276,27 +309,27 @@ TEMPLATE_PRODUCT_TEST_CASE("insert std::initializer_list overload", "[low::vecto
     v.emplace_back(44);
     SECTION("insert")
     {
-        v.insert(v.begin() , source.begin(), source.end());
+        REQUIRE(*v.insert(v.begin() , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{7, 8, 9, 10, 11, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin()) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin()) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 7, 8, 9, 10, 22, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 2) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 2) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 7, 8, 9, 10, 33, 44});
     }
     SECTION("insert")
     {
-        v.insert(std::next(v.begin(), 3) , source.begin(), source.end());
+        REQUIRE(*v.insert(std::next(v.begin(), 3) , source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 7, 8, 9, 10, 44});
     }
     SECTION("insert")
     {
-        v.insert(v.end(), source.begin(), source.end());
+        REQUIRE(*v.insert(v.end(), source.begin(), source.end()) == 7);
         REQUIRE(v == TestType{11, 22, 33, 44, 7, 8, 9, 10});
     }
 }
