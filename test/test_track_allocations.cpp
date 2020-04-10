@@ -104,7 +104,7 @@ struct tracked_allocator
 };
 
 template <typename T, bool isEqual,  bool pocma>
-struct tracked_allocator_pocma : tracked_allocator<T, true>
+struct tracked_allocator_pocma : tracked_allocator<T, isEqual>
 {
     using value_type = T;
 
@@ -118,7 +118,7 @@ struct tracked_allocator_pocma : tracked_allocator<T, true>
 };
 
 template <typename T, bool isEqual,  bool pocca>
-struct tracked_allocator_pocca : tracked_allocator<T, true>
+struct tracked_allocator_pocca : tracked_allocator<T, isEqual>
 {
     using value_type = T;
 
