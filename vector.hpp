@@ -31,6 +31,8 @@ namespace low
         using const_reference = const T&;
         using iterator = pointer;
         using const_iterator = const_pointer;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
         // employ user-provided allocator, since we ensured that it value_type is same as for vector,
         // thus no need to rebound allocator
         using allocator_type = Alloc;
