@@ -224,15 +224,26 @@ namespace low
         void resize(std::size_t new_size) { resize_impl(new_size); }
         void resize(std::size_t new_size, const_reference value) { resize_impl(new_size, value); }
 
-        reference operator[](std::size_t idx)
+        reference at(std::size_t pos)
         {
-            return *(begin_ + idx);
+            if (size() > pos)
+            {
+                return operator[](pos);
+            }
+            throw std::out_of_range{"out of bounds"};
         }
 
-        const_reference operator[](std::size_t idx) const
+        const_reference at(std::size_t pos) const
         {
-            return *(begin_ + idx);
+            if (size() > pos)
+            {
+                return operator[](pos);
+            }
+            throw std::out_of_range{"out of bounds"};
         }
+
+        reference operator[](std::size_t pos) { return *(begin_ + pos); }
+        const_reference operator[](std::size_t pos) const { return *(begin_ + pos); }
 
         reference front() noexcept { return *begin_; }
         const_reference front() const noexcept { return *begin_; }
