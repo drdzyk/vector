@@ -440,18 +440,18 @@ namespace low
             {
                 // capacity is not enough, so allocate new memory and insert all there
                 std::size_t new_capacity{size() + distance};
-                auto new_begin = allocator_traits::allocate(alloc_, new_capacity);
+                auto memory = allocate_memory_safe(new_capacity);
 
-                auto new_end = uninitialized_move_if_noexcept(begin_, pos, new_begin);
+                auto new_end = uninitialized_move_if_noexcept(begin_, pos, memory.get());
                 auto result_pos = new_end;
                 new_end = move_data_in_new_storage(new_end, distance, std::forward<U>(args));
                 new_end = uninitialized_move_if_noexcept(pos, end_, new_end);
 
                 release_storage();
 
-                begin_ = new_begin;
+                begin_ = memory.get();
                 end_ = new_end;
-                capacity_ = new_begin + new_capacity;
+                capacity_ = memory.release() + new_capacity;
                 return result_pos;
             }
             else if (distance > 0)
@@ -499,6 +499,15 @@ namespace low
             end_ = begin_ + new_size;
         }
 
+        auto allocate_memory_safe(std::size_t count) noexcept
+        {
+            pointer memory = allocator_traits::allocate(alloc_, count);
+            auto deleter = [this, count] (pointer memory) noexcept {
+                allocator_traits::deallocate(alloc_, memory, count);
+            };
+            return std::unique_ptr<value_type, decltype(deleter)>{memory, std::move(deleter)};
+        }
+
         iterator destroy(iterator first, iterator last) noexcept
         {
             // optimization: don't call destructors for trivial types
@@ -538,15 +547,15 @@ namespace low
         void reallocate_storage(std::size_t new_capacity, std::size_t current_size)
         {
             // allocate new storage
-            auto new_memory = allocator_traits::allocate(alloc_, new_capacity);
+            auto new_memory = allocate_memory_safe(new_capacity);
             // move old data in new storage
-            uninitialized_move_if_noexcept(begin_, begin_ + current_size, new_memory);
+            uninitialized_move_if_noexcept(begin_, begin_ + current_size, new_memory.get());
             // freed old storage
             release_storage();
 
-            begin_ = new_memory;
-            end_ = new_memory + current_size;
-            capacity_ = new_memory + new_capacity;
+            begin_ = new_memory.get();
+            end_ = new_memory.get() + current_size;
+            capacity_ = new_memory.release() + new_capacity;
         }
 
         void move_assign_impl(vector &&r)
