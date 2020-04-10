@@ -29,10 +29,15 @@ namespace low
         using const_pointer = const T*;
         using reference = T&;
         using const_reference = const T&;
-        using iterator = pointer;
-        using const_iterator = const_pointer;
+
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
+
+        using iterator = pointer;
+        using const_iterator = const_pointer;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
         // employ user-provided allocator, since we ensured that it value_type is same as for vector,
         // thus no need to rebound allocator
         using allocator_type = Alloc;
@@ -224,6 +229,15 @@ namespace low
 
         const_iterator cbegin() const noexcept { return begin_; }
         const_iterator cend() const noexcept { return end_; }
+
+        reverse_iterator rbegin() noexcept { return std::reverse_iterator(end_); }
+        reverse_iterator rend() noexcept { return std::reverse_iterator(begin_); }
+
+        const_reverse_iterator rbegin() const noexcept { return std::reverse_iterator(end_); }
+        const_reverse_iterator rend() const noexcept { return std::reverse_iterator(begin_); }
+
+        const_reverse_iterator crbegin() const noexcept { return std::reverse_iterator(end_); }
+        const_reverse_iterator crend() const noexcept { return std::reverse_iterator(begin_); }
         // </iterator methods>
 
         // <capacity methods>
