@@ -87,6 +87,8 @@ namespace low
             end_ = std::uninitialized_copy(list.begin(), list.end(), begin_);
         }
 
+        ~vector() noexcept { release_storage(); }
+
         vector &operator=(vector &&r) noexcept(is_equal_or_pocma_v)
         {
             if (this == &r) // be on a safe side
@@ -133,19 +135,6 @@ namespace low
             return *this;
         }
 
-        void swap(vector &r) noexcept
-        {
-            if constexpr (allocator_traits::propagate_on_container_swap::value)
-            {
-                // if this condition is true, then swap allocators shouldn't throw
-                // see https://en.cppreference.com/w/cpp/named_req/Allocator
-                std::swap(alloc_, r.alloc_);
-            }
-            std::swap(begin_, r.begin_);
-            std::swap(end_, r.end_);
-            std::swap(capacity_, r.capacity_);
-        }
-
         template <typename It>
         void assign(It first, It last)
         {
@@ -171,59 +160,9 @@ namespace low
             end_ = std::uninitialized_copy(pivot, last, end);
         }
 
-        void insert(const_iterator pos, std::size_t count, const value_type &value)
-        {
-            insert_base(pos, count, value);
-        }
+        const allocator_type &get_allocator() const noexcept { return alloc_; }
 
-        void insert(const_iterator pos, const value_type &value)
-        {
-            insert_base(pos, 1, value);
-        }
-
-        void insert(const_iterator pos, value_type &&value)
-        {
-            insert_base(pos, 1, std::move(value));
-        }
-
-        template <typename It, typename = Iterable<It>>
-        void insert(const_iterator pos, It first, It last)
-        {
-            auto distance = static_cast<std::size_t>(std::distance(first, last));
-            insert_base(pos, distance, first);
-        }
-
-        template <typename ...Args>
-        reference emplace_back(Args&& ...args)
-        {
-            if (auto current_size = size(); current_size == capacity())
-            {
-                std::size_t new_capacity = get_next_capacity_or(current_size);
-                reallocate_storage(new_capacity, current_size);
-            }
-            allocator_traits::construct(alloc_, end_, std::forward<Args>(args)...);
-            return *end_++;
-        }
-
-        void push_back(value_type &&value) { emplace_back(std::move(value)); }
-        void push_back(const value_type &value) { emplace_back(value); }
-
-        void pop_back()
-        {
-            allocator_traits::destroy(alloc_, --end_);
-        }
-
-        void reserve(std::size_t new_capacity)
-        {
-            if (new_capacity > capacity())
-            {
-                reallocate_storage(new_capacity, size());
-            }
-        }
-
-        void resize(std::size_t new_size) { resize_impl(new_size); }
-        void resize(std::size_t new_size, const_reference value) { resize_impl(new_size, value); }
-
+        // <elements access methods>
         reference at(std::size_t pos)
         {
             if (size() > pos)
@@ -253,11 +192,9 @@ namespace low
 
         pointer data() noexcept { return begin_; }
         const_pointer data() const noexcept { return begin_; }
+        // </elements access methods>
 
-        std::size_t size() const noexcept { return static_cast<std::size_t>(end_ - begin_); }
-        std::size_t capacity() const noexcept { return static_cast<std::size_t>(capacity_ - begin_); }
-        bool empty() const noexcept { return size() == 0u; }
-
+        // <iterator methods>
         iterator begin() noexcept { return begin_; }
         iterator end() noexcept { return end_; }
 
@@ -266,8 +203,62 @@ namespace low
 
         const_iterator cbegin() const noexcept { return begin_; }
         const_iterator cend() const noexcept { return end_; }
+        // </iterator methods>
 
-        const allocator_type &get_allocator() const noexcept { return alloc_; }
+        // <capacity methods>
+        bool empty() const noexcept { return size() == 0u; }
+        std::size_t size() const noexcept { return static_cast<std::size_t>(end_ - begin_); }
+
+        void reserve(std::size_t new_capacity)
+        {
+            if (new_capacity > capacity())
+            {
+                reallocate_storage(new_capacity, size());
+            }
+        }
+
+        std::size_t capacity() const noexcept { return static_cast<std::size_t>(capacity_ - begin_); }
+
+        void shrink_to_fit() noexcept
+        {
+            if (std::size_t current_size = size(); current_size == 0u)
+            {
+                release_storage();
+            }
+            else if (current_size != capacity())
+            {
+                reallocate_storage(current_size, current_size);
+            }
+        }
+        // </capacity methods>
+
+        // <modifiers methods>
+        void clear() noexcept
+        {
+            end_ = destroy(begin_, end_);
+        }
+
+        void insert(const_iterator pos, std::size_t count, const value_type &value)
+        {
+            insert_base(pos, count, value);
+        }
+
+        void insert(const_iterator pos, const value_type &value)
+        {
+            insert_base(pos, 1, value);
+        }
+
+        void insert(const_iterator pos, value_type &&value)
+        {
+            insert_base(pos, 1, std::move(value));
+        }
+
+        template <typename It, typename = Iterable<It>>
+        void insert(const_iterator pos, It first, It last)
+        {
+            auto distance = static_cast<std::size_t>(std::distance(first, last));
+            insert_base(pos, distance, first);
+        }
 
         iterator erase(const_iterator first, const_iterator last)
         {
@@ -286,24 +277,42 @@ namespace low
             return erase(pos, std::next(pos));
         }
 
-        void clear() noexcept
+        template <typename ...Args>
+        reference emplace_back(Args&& ...args)
         {
-            end_ = destroy(begin_, end_);
+            if (auto current_size = size(); current_size == capacity())
+            {
+                std::size_t new_capacity = get_next_capacity_or(current_size);
+                reallocate_storage(new_capacity, current_size);
+            }
+            allocator_traits::construct(alloc_, end_, std::forward<Args>(args)...);
+            return *end_++;
         }
 
-        void shrink_to_fit() noexcept
+        void push_back(value_type &&value) { emplace_back(std::move(value)); }
+        void push_back(const value_type &value) { emplace_back(value); }
+
+        void pop_back()
         {
-            if (std::size_t current_size = size(); current_size == 0u)
-            {
-                release_storage();
-            }
-            else if (current_size != capacity())
-            {
-                reallocate_storage(current_size, current_size);
-            }
+            allocator_traits::destroy(alloc_, --end_);
         }
 
-        ~vector() noexcept { release_storage(); }
+        void resize(std::size_t new_size) { resize_impl(new_size); }
+        void resize(std::size_t new_size, const_reference value) { resize_impl(new_size, value); }
+
+        void swap(vector &r) noexcept
+        {
+            if constexpr (allocator_traits::propagate_on_container_swap::value)
+            {
+                // if this condition is true, then swap allocators shouldn't throw
+                // see https://en.cppreference.com/w/cpp/named_req/Allocator
+                std::swap(alloc_, r.alloc_);
+            }
+            std::swap(begin_, r.begin_);
+            std::swap(end_, r.end_);
+            std::swap(capacity_, r.capacity_);
+        }
+        // </modifiers methods>
 
     private:
         // weak mean if move ctor noexcept - use it; but if it is not, and there is no copy ctor, then
