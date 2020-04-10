@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <utility>
 
 namespace low
 {
@@ -130,6 +131,13 @@ namespace low
             // and assign other elements using old or new allocator, depending on pocca
             assign(r.begin(), r.end());
             return *this;
+        }
+
+        void swap(vector &r)
+        {
+            std::swap(begin_, r.begin_);
+            std::swap(end_, r.end_);
+            std::swap(capacity_, r.capacity_);
         }
 
         template <typename It>

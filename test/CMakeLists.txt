@@ -30,6 +30,7 @@ add_executable(unit_test
     test_shrink_to_fit.cpp
     test_size.cpp
     test_sizeof.cpp
+    test_swap.cpp
     test_track_allocations.cpp
     Allocator.cpp
 )
