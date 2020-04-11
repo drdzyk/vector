@@ -12,8 +12,5 @@ add_compile_options(
     -fsanitize=address
 )
 
-add_executable(main main.cpp)
-target_link_libraries(main -fsanitize=address)
-
 add_subdirectory(test)
 add_subdirectory(benchmark EXCLUDE_FROM_ALL)
