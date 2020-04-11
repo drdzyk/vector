@@ -1,0 +1,16 @@
+This is an implementation of STL vector. There are a few differences though:
+1) get_allocator() returns allocator by const ref, not by value
+2) back(), front(), swap() are always noexcept
+
+Not implemented:
+  *  assign(std::size_t count, cont T &value)
+  *  assign(std::initializer_list<T> ilist)
+  *  max_size()
+  *  emplace()
+
+Requirements: catch2, clang >= 9 or gcc >= 9.
+
+Build and run:
+cmake .
+make
+make test
