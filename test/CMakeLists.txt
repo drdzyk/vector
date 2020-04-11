@@ -39,3 +39,7 @@ add_executable(unit_test
 )
 target_link_libraries(unit_test PRIVATE Catch2::Catch2 -fsanitize=address)
 target_include_directories(unit_test PRIVATE ${CMAKE_SOURCE_DIR})
+
+include(CTest)
+include(Catch)
+catch_discover_tests(unit_test)
