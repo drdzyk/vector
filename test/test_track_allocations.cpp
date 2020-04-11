@@ -224,7 +224,7 @@ TEST_CASE_METHOD(Fixture, "allocator-extended move constructor with not equal al
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .copy_ctor = 1}));
 }
 
-TEST_CASE_METHOD(Fixture, "move assign operator; pocma true")
+TEST_CASE_METHOD(Fixture, "move assign operator, pocma true")
 {
     low::vector<int, tracked_allocator_pocma<int, true, true>> source, copy;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
@@ -233,7 +233,7 @@ TEST_CASE_METHOD(Fixture, "move assign operator; pocma true")
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .move_assign = 1}));
 }
 
-TEST_CASE_METHOD(Fixture, "move assign operator; pocma false; allocators equal")
+TEST_CASE_METHOD(Fixture, "move assign operator, pocma false, allocators equal")
 {
     low::vector<int, tracked_allocator_pocma<int, true, false>> source, copy;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
@@ -242,7 +242,7 @@ TEST_CASE_METHOD(Fixture, "move assign operator; pocma false; allocators equal")
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
 }
 
-TEST_CASE_METHOD(Fixture, "move assign operator; pocma false; allocators not equal")
+TEST_CASE_METHOD(Fixture, "move assign operator, pocma false, allocators not equal")
 {
     low::vector<int, tracked_allocator_pocma<int, false, false>> source, copy;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
@@ -251,7 +251,7 @@ TEST_CASE_METHOD(Fixture, "move assign operator; pocma false; allocators not equ
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
 }
 
-TEST_CASE_METHOD(Fixture, "copy assign operator; pocca false")
+TEST_CASE_METHOD(Fixture, "copy assign operator, pocca false")
 {
     low::vector<int, tracked_allocator_pocca<int, true, false>> source, copy;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
@@ -260,7 +260,7 @@ TEST_CASE_METHOD(Fixture, "copy assign operator; pocca false")
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
 }
 
-TEST_CASE_METHOD(Fixture, "copy assign operator; pocca true; allocators equal")
+TEST_CASE_METHOD(Fixture, "copy assign operator, pocca true, allocators equal")
 {
     low::vector<int, tracked_allocator_pocca<int, true, true>> source, copy;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));
@@ -269,7 +269,7 @@ TEST_CASE_METHOD(Fixture, "copy assign operator; pocca true; allocators equal")
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2, .copy_assign = 1}));
 }
 
-TEST_CASE_METHOD(Fixture, "copy assign operator; pocca true; allocators not equal")
+TEST_CASE_METHOD(Fixture, "copy assign operator, pocca true, allocators not equal")
 {
     low::vector<int, tracked_allocator_pocca<int, false, true>> source, copy;
     REQUIRE(global_tracker == (GlobalTracker{.ctor = 2}));

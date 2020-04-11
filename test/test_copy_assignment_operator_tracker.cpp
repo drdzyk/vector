@@ -42,7 +42,7 @@ TEMPLATE_PRODUCT_TEST_CASE("copy assignment operator tracker", "[low::vector][st
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("copy assignment operator tracker; pocca true, allocators unequal", "[low::vector][std::vector]",
+TEMPLATE_PRODUCT_TEST_CASE("copy assignment operator tracker, pocca true, allocators unequal", "[low::vector][std::vector]",
     (low::vector, std::vector), (
         (TrackedType<>, alloc::DynamicNotEqPocca<TrackedType<>>)
     )

@@ -45,7 +45,7 @@ TEMPLATE_PRODUCT_TEST_CASE("move assignment operator tracker", "[low::vector][st
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("move assignment operator tracker; pocma false, allocators unequal", "[low::vector][std::vector]",
+TEMPLATE_PRODUCT_TEST_CASE("move assignment operator tracker, pocma false, allocators unequal", "[low::vector][std::vector]",
     (low::vector, std::vector), (
         (TrackedType<>, alloc::DynamicNotEq<TrackedType<>>)
     )
@@ -104,7 +104,7 @@ TEMPLATE_PRODUCT_TEST_CASE("move assignment operator tracker; pocma false, alloc
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("move assignment operator tracker; pocma false, allocators unequal", "noexcept TrackedType",
+TEMPLATE_PRODUCT_TEST_CASE("move assignment operator tracker, pocma false, allocators unequal", "noexcept TrackedType",
     (low::vector, std::vector), (
         (TrackedType<NoexceptMoveCtorTag>, alloc::DynamicNotEq<TrackedType<NoexceptMoveCtorTag>>)
     )
