@@ -418,15 +418,18 @@ namespace low
             {
                 if (pos == end_)
                 {
+                    // if we are at the end of storage - call constructor
                     allocator_traits::construct(alloc_, pos, std::forward<U>(value));
                 }
                 else
                 {
+                    // otherwise there is an object, so call assignment operator
                     *pos = std::forward<U>(value);
                 }
             }
             else
             {
+                // same, but for ranges
                 std::fill_n(pos, to_uninit_move_count, value);
                 std::uninitialized_fill_n(pos + to_uninit_move_count, count - to_uninit_move_count, value);
             }
