@@ -97,20 +97,24 @@ namespace low
         vector(std::size_t count, const value_type &value, const allocator_type &alloc = allocator_type{}) :
             alloc_(alloc)
         {
-            insert(begin_, count, value);
+            reserve(count);
+            end_ = std::uninitialized_fill_n(begin_, count, value);
         }
 
         explicit vector(std::size_t count, const allocator_type &alloc = allocator_type{}) :
             alloc_(alloc)
         {
-            resize(count);
+            reserve(count);
+            end_ = std::uninitialized_value_construct_n(begin_, count);
         }
 
         template<typename It, typename = Iterable<It>>
         vector(It first, It last, const allocator_type &alloc = allocator_type{}) :
             alloc_(alloc)
         {
-            assign(first, last);
+            const auto distance = static_cast<std::size_t>(std::distance(first, last));
+            reserve(distance);
+            end_ = std::uninitialized_copy_n(first, distance, begin_);
         }
 
         ~vector() noexcept { release_storage(); }
